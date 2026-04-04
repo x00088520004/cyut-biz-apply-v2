@@ -315,7 +315,11 @@ function getD2Pages(){return[{l:'D2封面',h:pCover('D2','學習歷程自述')},
 function getD3Pages(){return[{l:'D3封面',h:pCover('D3','其他有利審查資料')},{l:'語言+競賽',h:pDual('D3','語言檢定證書',fd.d3lang,fd.d3langimg,'D3','競賽獲獎紀錄',fd.d3awards,fd.d3awardsimg,2,3)},{l:'專題+其他',h:pDual('D3','專題成果',fd.d3projects,fd.d3projectsimg,'D3','其他有利資料',fd.d3other,fd.d3otherimg,3,3)}];}
 
 async function cap(html){
-  var d=document.createElement('div');d.style.cssText='position:fixed;left:-9999px;top:0;width:794px;height:1123px;overflow:hidden;background:white;z-index:-1';d.innerHTML=html;document.body.appendChild(d);
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;left:-9999px;top:0;width:794px;height:1123px;overflow:hidden;background:white;z-index:-1';
+  // 強制 letter-spacing:0 修正 html2canvas 中文字間距 bug
+  d.innerHTML='<style>*{letter-spacing:0!important;word-spacing:0!important;font-feature-settings:normal!important;text-rendering:optimizeSpeed!important}</style>'+html;
+  document.body.appendChild(d);
   var imgs=d.querySelectorAll('img');
   await Promise.all(Array.from(imgs).map(function(img){return img.complete?Promise.resolve():new Promise(function(r){img.onload=r;img.onerror=r;});}));
   await new Promise(function(r){setTimeout(r,200);});
