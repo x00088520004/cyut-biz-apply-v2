@@ -1,354 +1,1132 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>朝陽科大企管系 申請文件產生器</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>朝陽科技大學 企業管理系 — 申請文件產生器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
+:root{
+  /* Palette — warm editorial, archive paper */
+  --bg:#EFE9DA;            /* warm parchment */
+  --paper:#FFFFFF;
+  --cream:#FAF6ED;
+  --cream-deep:#F5EFE0;
+
+  --ink:#1A1612;           /* deep warm charcoal */
+  --ink-soft:#5A554E;      /* muted warm gray */
+  --ink-light:#8A847C;     /* light warm gray */
+
+  --navy:#1E2A4A;          /* deep midnight (school identity) */
+  --navy-deep:#0F1729;
+  --brass:#A8853A;         /* aged brass — primary accent */
+  --brass-deep:#8B6E2D;
+  --brass-light:#C9A44A;   /* highlight gold */
+  --brass-pale:#F0E5C3;
+  --brass-mist:#FAF1D9;
+
+  --line:#E5DDC9;          /* warm cream line */
+  --line-soft:#F0EBE0;
+  --line-strong:#C9C0AE;
+
+  /* Typography */
+  --serif:'Noto Serif TC',serif;
+  --sans:'Noto Sans TC','Microsoft JhengHei',sans-serif;
+  --display:'Cormorant Garamond','Noto Serif TC',serif;
+
+  /* Effects */
+  --shadow-soft:0 1px 2px rgba(26,22,18,.04),0 4px 16px rgba(26,22,18,.05);
+  --shadow-lift:0 6px 18px rgba(26,22,18,.09),0 16px 36px rgba(26,22,18,.08);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;background:#eef2f8;color:#1e2d42;-webkit-text-size-adjust:100%}
-#topbar{position:sticky;top:0;z-index:100;background:#0B2F5E;padding:8px 10px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
-.tb-row1{display:flex;align-items:center;gap:6px;margin-bottom:7px}
-.tb-tabs{display:flex;gap:5px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.tb-tabs::-webkit-scrollbar{display:none}
-.tab{padding:9px 18px;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);white-space:nowrap;-webkit-tap-highlight-color:transparent}
-.tab.on{background:#C9A44A;color:#1a1000}
-.tb-row2{display:flex;align-items:center;gap:5px}
-.tb-si{color:rgba(255,255,255,.5);font-size:12px;flex:1;text-align:center}
-.tb-btns{display:flex;gap:5px}
-.tb-btns button{padding:9px 14px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;-webkit-tap-highlight-color:transparent}
-#bprev{background:rgba(255,255,255,.12);color:white}
-#bnext{background:#C9A44A;color:#1a1000}
-#bpreview{background:rgba(255,255,255,.12);color:white}
-#bdl{background:linear-gradient(135deg,#C9A44A,#e8c566);color:#1a1000}
-#bdl:disabled{background:#444;color:#777}
-.prog{height:4px;background:rgba(255,255,255,.1)}
-.pf{height:100%;background:#C9A44A;transition:width .4s}
-.wrap{max-width:640px;margin:0 auto;padding:12px 12px 32px}
-.card{background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(11,47,94,.08);margin-bottom:12px;animation:fu .25s ease}
-@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.ch{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #eef2f8}
-.sb{background:#0B2F5E;color:#C9A44A;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:900;flex-shrink:0;text-align:center;line-height:1.4;min-width:36px}
-.ch h2{font-size:15px;color:#0B2F5E;font-weight:800}
-.ch small{font-size:11px;color:#8a9ab0;display:block;margin-top:2px}
-.fg{margin-bottom:12px}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-@media(max-width:480px){.fr{grid-template-columns:1fr}}
-label{display:block;font-size:12px;font-weight:700;color:#5a6a7e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
-.req::after{content:' *';color:#e74c3c}
-input[type=text],input[type=email],input[type=tel]{width:100%;padding:13px 15px;border:1.5px solid #d8e2ed;border-radius:10px;font-size:17px;font-family:inherit;color:#1e2d42;background:white;outline:none;display:block}
-input:focus{border-color:#0B2F5E}
-textarea.tf{width:100%;padding:13px 15px;border:1.5px solid #d8e2ed;border-radius:10px;font-size:17px;font-family:inherit;color:#1e2d42!important;background:white!important;outline:none;display:block;resize:vertical;line-height:1.8;min-height:130px}
-textarea.tf:focus{border-color:#0B2F5E}
-.traits-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-@media(max-width:480px){.traits-grid{grid-template-columns:1fr}}
-.trait-item{display:flex;align-items:center;gap:9px;padding:12px 14px;border:1.5px solid #d8e2ed;border-radius:10px;cursor:pointer;font-size:15px;color:#3a4a5a;background:white;-webkit-tap-highlight-color:transparent}
-.trait-item.on{border-color:#0B2F5E;background:#f0f4fa;color:#0B2F5E;font-weight:700}
-.ex-btn{display:inline-flex;align-items:center;gap:6px;background:#e8f5e9;border:1.5px solid #4CAF50;color:#1b5e20;border-radius:10px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;-webkit-tap-highlight-color:transparent}
-.iz{border:2px dashed #c8d6e5;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:white;position:relative;overflow:hidden;user-select:none;-webkit-tap-highlight-color:transparent}
-.iz.has{border-style:solid;border-color:#C9A44A}
-.iz img{max-height:90px;max-width:100%;border-radius:7px;object-fit:cover;pointer-events:none}
-.iz .ui{font-size:26px;margin-bottom:5px}
-.iz p{font-size:13px;color:#8a9ab0;pointer-events:none}
-.rmb{position:absolute;top:7px;right:7px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:13px;cursor:pointer;font-weight:700;line-height:24px;text-align:center;z-index:2}
+html,body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6}
+body{background-image:radial-gradient(circle at 20% 10%,rgba(168,133,58,.04) 0%,transparent 40%),radial-gradient(circle at 80% 90%,rgba(30,42,74,.03) 0%,transparent 40%);background-attachment:fixed;min-height:100vh}
+
+/* ════════ Top Bar ════════ */
+#topbar{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,var(--navy-deep),var(--navy));box-shadow:0 1px 0 var(--brass),0 2px 18px rgba(15,23,41,.35)}
+.tb-inner{padding:11px 14px;display:flex;flex-direction:column;gap:10px;max-width:1200px;margin:0 auto}
+.tb-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tb-brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.tb-mark{width:34px;height:34px;border:1px solid var(--brass-light);display:flex;align-items:center;justify-content:center;color:var(--brass-light);font-family:var(--display);font-style:italic;font-weight:600;font-size:18px;flex-shrink:0;background:rgba(201,164,74,.06);position:relative;letter-spacing:0;line-height:1;transition:all .3s}
+.tb-mark::before,.tb-mark::after{content:'';position:absolute;width:5px;height:5px;border:1px solid var(--brass-light)}
+.tb-mark::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.tb-mark::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+.tb-tt{color:#fff;font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--serif);letter-spacing:.5px}
+.tb-tt small{display:block;font-family:var(--display);font-style:italic;font-size:10.5px;color:var(--brass-light);font-weight:500;letter-spacing:1.5px;margin-top:2px;opacity:.85}
+
+.tb-tabs{display:flex;gap:0;background:transparent;border:1px solid rgba(201,164,74,.25);padding:0;border-radius:0}
+.tab{padding:8px 14px;border:none;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--serif);background:transparent;color:rgba(255,255,255,.55);transition:all .25s ease;letter-spacing:.8px;border-right:1px solid rgba(201,164,74,.18);position:relative}
+.tab:last-child{border-right:none}
+.tab.on{background:var(--brass-light);color:var(--navy-deep);font-weight:700}
+.tab:hover:not(.on){color:#fff;background:rgba(255,255,255,.06)}
+
+.tb-step{flex:1;text-align:center;color:rgba(255,255,255,.55);font-size:10.5px;font-weight:500;letter-spacing:2px;text-transform:uppercase;font-family:var(--display)}
+.tb-step b{color:var(--brass-light);font-family:var(--display);font-style:italic;font-size:17px;font-weight:600;margin:0 3px;letter-spacing:0}
+
+.tb-btns{display:flex;gap:6px;flex-wrap:wrap}
+.tb-btns button{padding:7px 13px;border:none;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--serif);white-space:nowrap;transition:all .2s;letter-spacing:.5px;border-radius:0}
+#bprev,#bpreview{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.22)}
+#bprev:hover,#bpreview:hover{border-color:var(--brass-light);color:var(--brass-light)}
+#bnext{background:var(--brass-light);color:var(--navy-deep);border:1px solid var(--brass-light)}
+#bnext:hover{background:#E1B85F;border-color:#E1B85F}
+#bdl{background:var(--brass);color:#fff;border:1px solid var(--brass-deep);box-shadow:0 1px 0 rgba(0,0,0,.1) inset}
+#bdl:hover:not(:disabled){background:var(--brass-deep)}
+#bdl:disabled{background:#3a3a3a;color:#777;cursor:not-allowed;border-color:#333}
+
+.prog{height:2px;background:rgba(201,164,74,.1);position:relative;overflow:hidden}
+.pf{height:100%;background:var(--brass-light);transition:width .5s cubic-bezier(.65,.05,.36,1);box-shadow:0 0 4px rgba(201,164,74,.4)}
+
+/* ════════ Wrap & Cards ════════ */
+.wrap{max-width:640px;margin:0 auto;padding:18px 14px 36px}
+
+.card{background:var(--paper);padding:22px 22px 18px;box-shadow:var(--shadow-soft);margin-bottom:14px;animation:fu .4s cubic-bezier(.2,.8,.2,1);border:1px solid var(--line);position:relative}
+.card::after{content:'';position:absolute;top:8px;left:8px;right:8px;bottom:8px;border:1px solid var(--line-soft);pointer-events:none;opacity:.6}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.ch{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line);position:relative}
+.ch::after{content:'';position:absolute;bottom:-1px;left:0;width:48px;height:1px;background:var(--brass)}
+.sb{background:var(--cream-deep);color:var(--navy);width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-size:18px;font-weight:600;flex-shrink:0;border:1px solid var(--brass-light);letter-spacing:.5px;line-height:1}
+.sb[style*="line-height:1.3"]{font-size:13px;line-height:1.2}
+.ch h2{font-size:17px;color:var(--ink);font-weight:700;letter-spacing:.5px;font-family:var(--serif);line-height:1.3}
+.ch small{font-size:11px;color:var(--ink-soft);display:block;margin-top:4px;font-weight:500;font-family:var(--sans);letter-spacing:.3px;line-height:1.5}
+
+/* ════════ Form Controls ════════ */
+.fg{margin-bottom:14px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+label{display:block;font-size:10px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:1.5px;font-family:var(--display)}
+.req::after{content:' *';color:#A8453A;font-style:italic}
+
+input[type=text],input[type=email],input[type=tel]{width:100%;padding:10px 13px;border:1px solid var(--line-strong);font-size:14px;font-family:var(--sans);color:var(--ink);background:var(--cream);outline:none;display:block;transition:all .25s;border-radius:0}
+input:focus{border-color:var(--brass);background:#fff;box-shadow:0 0 0 3px rgba(168,133,58,.08)}
+
+textarea.tf{width:100%;padding:13px 15px;border:1px solid var(--line-strong);font-size:14px;font-family:var(--sans);color:var(--ink);background:var(--cream);outline:none;display:block;resize:vertical;line-height:1.9;min-height:130px;transition:all .25s;border-radius:0}
+textarea.tf:focus{border-color:var(--brass);background:#fff;box-shadow:0 0 0 3px rgba(168,133,58,.08)}
+::placeholder{color:#B8AE9C;opacity:1}
+
+/* ════════ Traits ════════ */
+.traits-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px}
+.trait-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--line-strong);cursor:pointer;font-size:13px;color:var(--ink);background:var(--cream);transition:all .2s;font-weight:500}
+.trait-item:hover{border-color:var(--brass);background:var(--brass-mist)}
+.trait-item.on{border-color:var(--navy);background:var(--cream-deep);color:var(--navy);font-weight:600}
+.trait-item .ck{width:14px;height:14px;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;border-radius:0}
+.trait-item.on .ck{background:var(--navy);border-color:var(--navy);color:var(--brass-light)}
+.trait-item.on .ck::after{content:'✓';font-size:10px;font-weight:900}
+
+/* ════════ Example Button ════════ */
+.ex-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--brass);color:var(--brass-deep);padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--serif);margin-bottom:10px;transition:all .25s;letter-spacing:.5px;border-radius:0;position:relative}
+.ex-btn:hover{background:var(--brass);color:#fff}
+.ex-btn .ex-spark{font-size:11px;font-family:var(--display);font-style:italic;color:var(--brass-light)}
+.ex-btn:hover .ex-spark{color:#fff}
+
+/* ════════ Image Upload Zone ════════ */
+.iz-wrap{background:var(--cream);border:1px dashed var(--line-strong);padding:11px;transition:all .25s}
+.iz-wrap:hover{border-color:var(--brass);background:var(--brass-mist)}
+.iz-wrap.has{border-style:solid;border-color:var(--brass);background:var(--brass-mist)}
+.iz-hint{font-size:10.5px;color:var(--ink-soft);margin-bottom:8px;display:flex;align-items:center;gap:7px;font-weight:500;font-family:var(--sans);letter-spacing:.3px}
+.iz-hint .iz-tag{background:var(--navy);color:var(--brass-light);font-size:9px;padding:2px 7px;font-weight:700;letter-spacing:1px;font-family:var(--display);text-transform:uppercase}
+.iz-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.iz-item{position:relative;background:#fff;border:1px solid var(--line-strong);padding:5px;height:84px;overflow:hidden}
+.iz-item img{width:100%;height:100%;object-fit:contain;display:block;background:var(--cream)}
+.iz-rm{position:absolute;top:4px;right:4px;background:var(--ink);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:10px;cursor:pointer;font-weight:700;line-height:20px;text-align:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.iz-rm:hover{background:#A8453A}
+.iz-add{display:flex;flex-direction:column;align-items:center;justify-content:center;height:84px;border:1px dashed var(--line-strong);cursor:pointer;background:#fff;color:var(--ink-soft);transition:all .25s;user-select:none}
+.iz-add:hover{border-color:var(--navy);background:var(--cream-deep);color:var(--navy)}
+.iz-add-icon{font-size:20px;font-weight:300;line-height:1;margin-bottom:4px;font-family:var(--display)}
+.iz-add-txt{font-size:10.5px;font-weight:500;letter-spacing:.5px;font-family:var(--sans)}
 input[type=file]{display:none}
-.notice{background:linear-gradient(135deg,#0B2F5E,#1a4a8a);color:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:13px;margin-bottom:12px;font-size:14px}
-.notice h3{font-size:15px;margin-bottom:3px}
-.notice .tag{font-size:12px;color:#C9A44A;margin-top:4px}
-#exmodal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.65);align-items:flex-end;justify-content:center}
-@media(min-width:600px){#exmodal{align-items:center}}
-#exmodal.show{display:flex}
-#exbox{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.3)}
-@media(min-width:600px){#exbox{border-radius:16px;max-height:85vh}}
-.ex-hd{background:linear-gradient(135deg,#27ae60,#2ecc71);padding:15px 18px;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
-@media(min-width:600px){.ex-hd{border-radius:16px 16px 0 0}}
-.ex-hd h3{color:white;font-size:16px}
-.ex-hd small{color:rgba(255,255,255,.9);font-size:12px;display:block;margin-top:2px}
-#exclosebtn{background:rgba(255,255,255,.2);color:white;border:none;border-radius:9px;padding:8px 16px;cursor:pointer;font-size:15px;font-weight:700}
-.ex-body{padding:16px;background:#fff}
-.ex-intro{font-size:13px;color:#2e7d32;margin-bottom:13px;font-weight:700;background:#e8f5e9;padding:11px 14px;border-radius:9px}
-.ex-item{border:2px solid #a5d6a7;border-radius:13px;padding:15px;margin-bottom:13px;cursor:pointer;background:#fff;-webkit-tap-highlight-color:transparent}
-.ex-item:active{background:#f1f8f1}
-.ex-num{font-size:12px;font-weight:700;color:#fff;background:#0B2F5E;padding:3px 10px;border-radius:8px;display:inline-block;margin-bottom:6px}
-.ex-tag{font-size:12px;font-weight:700;color:#fff;background:#27ae60;padding:3px 10px;border-radius:8px;display:inline-block;margin-bottom:10px;margin-left:6px}
-.ex-text{font-size:14px;color:#1a2832;line-height:1.85;white-space:pre-wrap}
-.ex-hint{font-size:12px;color:#666;text-align:center;margin-top:9px;background:#f5f5f5;padding:9px;border-radius:8px}
-#pvmodal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);flex-direction:column}
-#pvmodal.show{display:flex}
-#pvtop{background:#0B2F5E;padding:11px 15px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-#pvtop span{color:#C9A44A;font-size:15px;font-weight:700;flex:1}
-#pvclosebtn{background:rgba(255,255,255,.15);color:white;border:none;padding:9px 16px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:700}
-#pvbody{flex:1;overflow-y:auto;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:20px}
-.pv-lbl{color:rgba(255,255,255,.5);font-size:11px;margin-bottom:5px;text-align:center;font-weight:700;letter-spacing:1px}
-.pv-outer{overflow:hidden;border-radius:7px;box-shadow:0 6px 30px rgba(0,0,0,.7)}
-#lo{display:none;position:fixed;inset:0;background:rgba(5,15,35,.88);z-index:9999;align-items:center;justify-content:center}
+
+/* ════════ Notice ════════ */
+.notice{background:linear-gradient(135deg,var(--navy-deep),var(--navy));color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:14px;font-size:13px;box-shadow:var(--shadow-soft);position:relative;overflow:hidden;border:1px solid var(--brass-deep)}
+.notice::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--brass-light),var(--brass),var(--brass-light))}
+.notice .ico{font-size:24px;flex-shrink:0;font-family:var(--display);color:var(--brass-light)}
+.notice h3{font-size:14px;margin-bottom:4px;font-weight:700;letter-spacing:.5px;font-family:var(--serif)}
+.notice p{font-size:12px;opacity:.85;line-height:1.5}
+.notice .tag{font-size:10.5px;color:var(--brass-light);margin-top:5px;font-weight:600;letter-spacing:.5px;font-family:var(--display)}
+
+/* ════════ Modals ════════ */
+#exmodal{display:none;position:fixed;inset:0;z-index:300;background:rgba(26,22,18,.55);align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(6px)}
+#exmodal.show{display:flex;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#exbox{background:var(--cream);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.4);animation:popin .3s cubic-bezier(.2,.8,.2,1);border:1px solid var(--brass)}
+@keyframes popin{from{opacity:0;transform:scale(.96) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.ex-hd{background:var(--navy-deep);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1;border-bottom:1px solid var(--brass)}
+.ex-hd h3{color:#fff;font-size:15px;font-family:var(--serif);font-weight:600;letter-spacing:.5px}
+.ex-hd small{color:var(--brass-light);font-size:10.5px;display:block;margin-top:3px;font-weight:500;letter-spacing:1px;font-family:var(--display);font-style:italic}
+#exclosebtn{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);padding:6px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;font-family:var(--serif);border-radius:0}
+#exclosebtn:hover{border-color:var(--brass-light);color:var(--brass-light)}
+.ex-body{padding:18px;background:var(--cream)}
+.ex-intro{font-size:12.5px;color:var(--navy);margin-bottom:15px;font-weight:500;background:var(--brass-mist);padding:11px 14px;border-left:2px solid var(--brass);line-height:1.6;font-family:var(--sans)}
+
+.ex-item{border:1px solid var(--line-strong);padding:16px 17px;margin-bottom:12px;cursor:pointer;transition:all .25s;background:#fff;position:relative;overflow:hidden}
+.ex-item::before{content:'';position:absolute;top:0;left:0;bottom:0;width:0;background:var(--brass);transition:width .25s}
+.ex-item:hover{border-color:var(--brass);transform:translateY(-1px);box-shadow:0 6px 18px rgba(168,133,58,.12)}
+.ex-item:hover::before{width:3px}
+.ex-num{font-size:9.5px;font-weight:600;color:var(--ink-soft);background:transparent;padding:0 0 4px 0;display:inline-block;margin-bottom:6px;letter-spacing:2px;font-family:var(--display);text-transform:uppercase;border-bottom:1px solid var(--brass)}
+.ex-tag{font-size:11.5px;font-weight:700;color:var(--navy);background:transparent;padding:2px 0;display:inline-block;margin-bottom:10px;margin-left:10px;font-family:var(--serif);letter-spacing:.3px}
+.ex-text{font-size:13px;color:var(--ink);line-height:1.95;white-space:pre-wrap;font-family:var(--sans)}
+.ex-hint{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:12px;padding:10px;font-weight:500;font-family:var(--display);font-style:italic;letter-spacing:.5px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+#pvmodal{display:none;position:fixed;inset:0;z-index:200;background:rgba(15,23,41,.96);flex-direction:column}
+#pvmodal.show{display:flex;animation:fade .25s ease}
+#pvtop{background:var(--navy-deep);padding:12px 16px;display:flex;align-items:center;gap:11px;flex-shrink:0;border-bottom:1px solid var(--brass)}
+#pvtop span{color:var(--brass-light);font-size:14px;font-weight:600;flex:1;font-family:var(--serif);letter-spacing:.5px}
+#pvclosebtn{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);padding:7px 16px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;font-family:var(--serif);border-radius:0}
+#pvclosebtn:hover{border-color:var(--brass-light);color:var(--brass-light)}
+#pvbody{flex:1;overflow-y:auto;padding:30px 12px;display:flex;flex-direction:column;align-items:center;gap:30px}
+.pv-lbl{color:var(--brass-light);font-size:11px;margin-bottom:9px;text-align:center;font-weight:600;letter-spacing:3px;font-family:var(--display);font-style:italic;text-transform:uppercase}
+.pv-outer{overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.6),0 0 0 1px rgba(201,164,74,.3)}
+
+/* ════════ Loading ════════ */
+#lo{display:none;position:fixed;inset:0;background:rgba(15,23,41,.92);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 #lo.show{display:flex}
-.lc{background:#fff;border-radius:16px;padding:30px 38px;text-align:center;min-width:200px}
-.ring{width:46px;height:46px;border:5px solid #eef2f8;border-top:5px solid #0B2F5E;border-right:5px solid #C9A44A;border-radius:50%;animation:sp .9s linear infinite;margin:0 auto 13px}
+.lc{background:var(--cream);padding:32px 42px;text-align:center;min-width:240px;box-shadow:0 32px 72px rgba(0,0,0,.45);border:1px solid var(--brass);position:relative}
+.lc::before{content:'';position:absolute;top:-1px;left:0;right:0;height:2px;background:var(--brass-light)}
+.ring{width:48px;height:48px;border:4px solid var(--line);border-top:4px solid var(--navy);border-right:4px solid var(--brass);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto 14px}
 @keyframes sp{to{transform:rotate(360deg)}}
-.lc h3{font-size:16px;color:#0B2F5E;margin-bottom:4px}
-#lst{font-size:12px;color:#C9A44A;margin-top:6px;font-weight:700}
+.lc h3{font-size:15px;color:var(--navy);margin-bottom:6px;font-weight:600;font-family:var(--serif);letter-spacing:.5px}
+.lc p{font-size:12px;color:var(--ink-soft)}
+#lst{font-size:11.5px;color:var(--brass-deep);margin-top:9px;font-weight:600;letter-spacing:1px;font-family:var(--display);font-style:italic}
+
+/* ════════ Hero Mark (first card) ════════ */
+.hero-mark{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line);position:relative}
+.hero-mark::after{content:'';position:absolute;bottom:-1px;left:0;width:60px;height:1px;background:var(--brass)}
+.hero-mark-emblem{width:48px;height:48px;border:1px solid var(--brass);display:flex;align-items:center;justify-content:center;color:var(--brass-deep);background:var(--cream);font-family:var(--display);font-weight:600;font-size:24px;font-style:italic;flex-shrink:0;position:relative}
+.hero-mark-emblem::before,.hero-mark-emblem::after{content:'';position:absolute;width:6px;height:6px;border:1px solid var(--brass)}
+.hero-mark-emblem::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.hero-mark-emblem::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+.hero-mark-text{flex:1;min-width:0}
+.hero-mark-text .l1{font-size:9.5px;color:var(--ink-light);letter-spacing:3px;font-weight:600;margin-bottom:4px;font-family:var(--display);text-transform:uppercase}
+.hero-mark-text .l2{font-size:16px;color:var(--ink);font-weight:700;font-family:var(--serif);letter-spacing:.5px;line-height:1.3}
+.hero-mark-text .l3{font-size:11.5px;color:var(--brass-deep);font-weight:500;margin-top:4px;letter-spacing:.5px;font-style:italic;font-family:var(--display)}
+
+/* Mobile tweaks */
+@media (max-width:480px){
+  .tb-tt{font-size:12px}
+  .tab{padding:6px 10px;font-size:11px}
+  .tb-btns button{padding:6px 11px;font-size:11px}
+  .traits-grid{grid-template-columns:1fr}
+  .wrap{padding:14px 12px 28px}
+  .card{padding:18px 18px 14px}
+  .card::after{top:6px;left:6px;right:6px;bottom:6px}
+  .ch h2{font-size:15px}
+}
 </style>
 </head>
 <body>
 
 <div id="topbar">
-  <div class="tb-row1">
-    <div class="tb-tabs">
-      <button class="tab on" data-doc="0">D1 多元表現</button>
-      <button class="tab" data-doc="1">D2 學習歷程</button>
-      <button class="tab" data-doc="2">D3 有利資料</button>
+  <div class="tb-inner">
+    <div class="tb-row">
+      <div class="tb-brand">
+        <div class="tb-mark" id="tb-mark">I</div>
+        <div class="tb-tt">朝陽科大 企業管理系<small>APPLICATION DOCUMENT BUILDER</small></div>
+      </div>
+    </div>
+    <div class="tb-row">
+      <div class="tb-tabs">
+        <button class="tab on" data-doc="0">D1 多元表現</button>
+        <button class="tab" data-doc="1">D2 學習歷程</button>
+        <button class="tab" data-doc="2">D3 有利資料</button>
+      </div>
+    </div>
+    <div class="tb-row">
+      <div class="tb-step" id="si">步驟 <b>1</b> / <b>6</b></div>
+      <div class="tb-btns">
+        <button id="bprev">‹ 上一步</button>
+        <button id="bnext">下一步 ›</button>
+        <button id="bpreview">👁 預覽</button>
+        <button id="bdl">📄 下載 PDF</button>
+      </div>
     </div>
   </div>
-  <div class="tb-row2">
-    <div class="tb-si" id="si">步驟 1 / 6</div>
-    <div class="tb-btns">
-      <button id="bprev">‹ 上一步</button>
-      <button id="bnext">下一步 ›</button>
-      <button id="bpreview">👁 預覽</button>
-      <button id="bdl">📄 下載PDF</button>
-    </div>
-  </div>
+  <div class="prog"><div class="pf" id="fill"></div></div>
 </div>
-<div class="prog"><div class="pf" id="fill"></div></div>
+
 <div class="wrap"><div id="fc"></div></div>
 
 <div id="exmodal">
   <div id="exbox">
-    <div class="ex-hd"><div><h3 id="ex-title">💡 參考範例</h3><small>選一份填入，再依自己情況修改</small></div><button id="exclosebtn">✕</button></div>
+    <div class="ex-hd">
+      <div><h3 id="ex-title">參考範例</h3><small>選一份填入後，依自己真實經歷修改</small></div>
+      <button id="exclosebtn">✕ 關閉</button>
+    </div>
     <div class="ex-body" id="ex-body"></div>
   </div>
 </div>
+
 <div id="pvmodal">
-  <div id="pvtop"><span>📄 PDF 預覽</span><button id="pvclosebtn">✕ 關閉</button></div>
+  <div id="pvtop">
+    <span>📄 PDF 預覽</span>
+    <button id="pvclosebtn">✕ 關閉預覽</button>
+  </div>
   <div id="pvbody"></div>
 </div>
-<div id="lo"><div class="lc"><div class="ring"></div><h3>正在生成 PDF</h3><p style="font-size:13px;color:#8a9ab0">請勿關閉頁面</p><div id="lst">準備中...</div></div></div>
+
+<div id="lo">
+  <div class="lc">
+    <div class="ring"></div>
+    <h3>正在生成 PDF</h3>
+    <p>請勿關閉頁面</p>
+    <div id="lst">準備中...</div>
+  </div>
+</div>
 
 <script>
-var doc=0,step=[0,0,0],TOTALS=[6,7,4],currentExKey='';
-var fd={school:'',dept:'',name:'',c2:'',c2img:null,c3:'',c3img:null,c4:'',c4h:'',c4img:null,c8:'',c8img:null,d1conc:'',d2roles:'',d2activities:'',d2competitions:'',d2traits:[],d2phone:'',d2email:'',d2bio:'',d2motive:'',d2g1n:'',d2g1t:'',d2g1img:null,d2g2n:'',d2g2t:'',d2g3n:'',d2g3t:'',d2c1n:'',d2c1t:'',d2c2n:'',d2c2t:'',d2plan:'',d2reflect:'',d3lang:'',d3langimg:null,d3awards:'',d3awardsimg:null,d3projects:'',d3projectsimg:null,d3other:'',d3otherimg:null};
-var TRAITS=['重視責任與合作','主動學習、持續精進','關心產業發展','邏輯清晰、善於分析','思考靈活、常有創意','規劃有條理、執行力強','表達清晰、溝通良好'];
+/* ════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════ */
+var doc=0, step=[0,0,0], TOTALS=[6,7,4], currentExKey='';
 
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-// accept="image/*" 只寫這樣，手機會跳出選單讓使用者選相機或相簿
-function iz(key){
-  var f='<input type="file" id="f_'+key+'" accept="image/*" data-for="'+key+'">';
-  return fd[key]
-    ?'<div class="iz has" data-zone="'+key+'"><img src="'+fd[key]+'"><button class="rmb" data-rm="'+key+'">✕</button></div>'+f
-    :'<div class="iz" data-zone="'+key+'"><div class="ui">📸</div><p>點擊上傳（相機或相簿）</p></div>'+f;
-}
-function exbtn(key,lbl){return'<button class="ex-btn" data-ex="'+key+'">💡 參考範例 — '+lbl+'</button>';}
-function traitsHTML(){return'<div class="traits-grid">'+TRAITS.map(function(t,i){var on=fd.d2traits.indexOf(t)>=0;return'<label class="trait-item'+(on?' on':'')+'" data-trait="'+i+'"><span style="font-size:18px">'+(on?'☑':'☐')+'</span><span>'+t+'</span></label>';}).join('')+'</div>';}
-
-var D1=[
-  function(){return'<div class="card"><div class="ch"><div class="sb">D1<br><span style="font-size:9px">封面</span></div><div><h2>封面基本資訊</h2><small>三份文件共用，填一次即可</small></div></div><div class="fr"><div><label class="req">畢業學校</label><input type="text" data-f="school" placeholder="例：國立台中附工" value="'+esc(fd.school)+'"></div><div><label class="req">畢業科系</label><input type="text" data-f="dept" placeholder="例：商業經營科" value="'+esc(fd.dept)+'"></div></div><div class="fg"><label class="req">申請人姓名</label><input type="text" data-f="name" placeholder="請填寫全名" value="'+esc(fd.name)+'"></div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">C-2</div><div><h2>社團活動</h2><small>高中三年社團參與、角色、收穫</small></div></div>'+exbtn('c2','社團活動')+'<textarea class="tf" data-f="c2" placeholder="高一至高二：社團名稱\n活動內容與收穫。\n\n高二起：社團名稱（職稱）\n具體活動、學到的能力。">'+esc(fd.c2)+'</textarea><div class="fg" style="margin-top:10px"><label>相關照片（可選）</label>'+iz('c2img')+'</div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">C-3</div><div><h2>幹部經驗</h2><small>各年級擔任幹部職責與貢獻</small></div></div>'+exbtn('c3','幹部經驗')+'<textarea class="tf" data-f="c3" placeholder="高一：職稱\n負責事項與成果。\n\n高二：職稱\n負責事項與成果。">'+esc(fd.c3)+'</textarea><div class="fg" style="margin-top:10px"><label>相關照片（可選）</label>'+iz('c3img')+'</div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">C-4</div><div><h2>服務學習</h2></div></div>'+exbtn('c4','服務學習')+'<textarea class="tf" data-f="c4" placeholder="班級環境整理\n內容與收穫。\n\n社區志工\n地點、內容與反思。">'+esc(fd.c4)+'</textarea><div class="fr" style="margin-top:10px"><div><label>累計服務時數</label><input type="text" data-f="c4h" placeholder="例：72 小時" value="'+esc(fd.c4h)+'"></div><div><label>相關照片（可選）</label>'+iz('c4img')+'</div></div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">C-8</div><div><h2>特殊優良表現</h2></div></div>'+exbtn('c8','特殊表現')+'<textarea class="tf" data-f="c8" placeholder="學業表現\n成績、排名、獎項。\n\n競賽表現\n比賽名稱與獎項。">'+esc(fd.c8)+'</textarea><div class="fg" style="margin-top:10px"><label>獎狀或照片（可選）</label>'+iz('c8img')+'</div></div>';},
-  function(){return'<div class="notice"><div style="font-size:28px">🎉</div><div><h3>D1 最後一步！</h3><p>完成後按「👁 預覽」確認，再按「📄 下載PDF」</p><div class="tag">⚠️ 生成需 20–35 秒</div></div></div><div class="card"><div class="ch"><div class="sb" style="line-height:1.3">結<br>論</div><div><h2>多元表現總整心得</h2></div></div>'+exbtn('d1conc','總整結論')+'<textarea class="tf" data-f="d1conc" style="min-height:160px" placeholder="① 統整幹部、社團、服務、競賽各類成長\n② 說明如何確立對企管的興趣\n③ 表達就讀朝陽企管系的期望">'+esc(fd.d1conc)+'</textarea></div>';},
-];
-var D2=[
-  function(){return'<div class="card"><div class="ch"><div class="sb">D2<br><span style="font-size:9px">簡歷</span></div><div><h2>個人簡歷</h2></div></div><div class="fg"><label>幹部經歷（每行一條）</label><textarea class="tf" data-f="d2roles" style="min-height:90px" placeholder="高一英文小老師\n高二商業概論小老師">'+esc(fd.d2roles)+'</textarea></div><div class="fg"><label>活動參與（每行一條）</label><textarea class="tf" data-f="d2activities" style="min-height:80px" placeholder="高一：羽球隊幹部">'+esc(fd.d2activities)+'</textarea></div><div class="fg"><label>競賽表現（每行一條）</label><textarea class="tf" data-f="d2competitions" style="min-height:80px" placeholder="班際杯籃球賽第一名">'+esc(fd.d2competitions)+'</textarea></div><div class="fg"><label>個人特質（可複選）</label>'+traitsHTML()+'</div><div class="fr"><div><label>聯絡電話</label><input type="tel" data-f="d2phone" placeholder="0912-345-678" value="'+esc(fd.d2phone)+'"></div><div><label>Email</label><input type="email" data-f="d2email" placeholder="example@mail.com" value="'+esc(fd.d2email)+'"></div></div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>自傳</h2></div></div>'+exbtn('d2bio','自傳')+'<textarea class="tf" data-f="d2bio" style="min-height:200px" placeholder="① 家庭背景與成長環境\n② 求學過程與重要轉折\n③ 個人特質與興趣專長">'+esc(fd.d2bio)+'</textarea></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>就讀動機</h2></div></div>'+exbtn('d2motive','就讀動機')+'<textarea class="tf" data-f="d2motive" style="min-height:200px" placeholder="① 對企業管理的興趣從何而來\n② 了解朝陽企管系的契機\n③ 就讀後的期望">'+esc(fd.d2motive)+'</textarea></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>學習歷程—成績</h2></div></div><div class="fg"><label class="req">科目一</label><input type="text" data-f="d2g1n" placeholder="例：會計學" value="'+esc(fd.d2g1n)+'"></div><div class="fg"><label>心得</label><textarea class="tf" data-f="d2g1t" style="min-height:100px" placeholder="遇到的困難、克服方法、成長。">'+esc(fd.d2g1t)+'</textarea></div><div class="fg"><label class="req">科目二</label><input type="text" data-f="d2g2n" placeholder="例：經濟概論" value="'+esc(fd.d2g2n)+'"></div><div class="fg"><label>心得</label><textarea class="tf" data-f="d2g2t" style="min-height:100px" placeholder="描述學習過程與收穫。">'+esc(fd.d2g2t)+'</textarea></div><div class="fg"><label>佐證照片（可選）</label>'+iz('d2g1img')+'</div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>成績（2/2）＆課程成果</h2></div></div><div class="fg"><label class="req">科目三</label><input type="text" data-f="d2g3n" placeholder="例：商業概論" value="'+esc(fd.d2g3n)+'"></div><div class="fg"><label>心得</label><textarea class="tf" data-f="d2g3t" style="min-height:90px">'+esc(fd.d2g3t)+'</textarea></div><div class="fg"><label>課程成果一</label><input type="text" data-f="d2c1n" placeholder="例：高二多元選修" value="'+esc(fd.d2c1n)+'"></div><div class="fg"><label>描述</label><textarea class="tf" data-f="d2c1t" style="min-height:80px">'+esc(fd.d2c1t)+'</textarea></div><div class="fg"><label>課程成果二</label><input type="text" data-f="d2c2n" placeholder="例：高三小論文" value="'+esc(fd.d2c2n)+'"></div><div class="fg"><label>描述</label><textarea class="tf" data-f="d2c2t" style="min-height:80px">'+esc(fd.d2c2t)+'</textarea></div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>未來學習計畫</h2></div></div>'+exbtn('d2plan','未來學習計畫')+'<textarea class="tf" data-f="d2plan" style="min-height:170px" placeholder="① 語言能力提升計畫\n② 希望爭取的實習機會\n③ 想修習的專業方向">'+esc(fd.d2plan)+'</textarea></div>';},
-  function(){return'<div class="notice"><div style="font-size:28px">✨</div><div><h3>D2 最後一步！</h3><p>完成後按「👁 預覽」確認，再按「📄 下載PDF」</p><div class="tag">⚠️ 生成需 20–35 秒</div></div></div><div class="card"><div class="ch"><div class="sb">D2</div><div><h2>學習歷程反思總結</h2></div></div>'+exbtn('d2reflect','學習歷程反思')+'<textarea class="tf" data-f="d2reflect" style="min-height:180px" placeholder="① 三年學習中最大的轉變\n② 確認了哪些未來方向\n③ 為什麼確信朝陽企管系是最佳選擇">'+esc(fd.d2reflect)+'</textarea></div>';},
-];
-var D3=[
-  function(){return'<div class="card"><div class="ch"><div class="sb">D3</div><div><h2>語言檢定證書</h2></div></div><textarea class="tf" data-f="d3lang" style="min-height:110px" placeholder="例：全民英語檢定中級（通過）">'+esc(fd.d3lang)+'</textarea><div class="fg" style="margin-top:10px"><label>證書照片（可選）</label>'+iz('d3langimg')+'</div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">D3</div><div><h2>競賽獲獎紀錄</h2></div></div><textarea class="tf" data-f="d3awards" style="min-height:130px" placeholder="例：校內小論文比賽優等">'+esc(fd.d3awards)+'</textarea><div class="fg" style="margin-top:10px"><label>獎狀或照片（可選）</label>'+iz('d3awardsimg')+'</div></div>';},
-  function(){return'<div class="card"><div class="ch"><div class="sb">D3</div><div><h2>專題成果與課堂報告</h2></div></div><textarea class="tf" data-f="d3projects" style="min-height:130px" placeholder="例：高三自主學習：探討台灣手搖飲品牌策略">'+esc(fd.d3projects)+'</textarea><div class="fg" style="margin-top:10px"><label>成果照片（可選）</label>'+iz('d3projectsimg')+'</div></div>';},
-  function(){return'<div class="notice"><div style="font-size:28px">🏁</div><div><h3>D3 最後一步！</h3><p>完成後按「👁 預覽」確認，再按「📄 下載PDF」</p></div></div><div class="card"><div class="ch"><div class="sb">D3</div><div><h2>其他有利審查資料</h2></div></div><textarea class="tf" data-f="d3other" style="min-height:140px" placeholder="例：曾參觀朝陽科技大學校園開放日。">'+esc(fd.d3other)+'</textarea><div class="fg" style="margin-top:10px"><label>相關照片（可選）</label>'+iz('d3otherimg')+'</div></div>';},
-];
-var DOCS=[D1,D2,D3];
-
-var EX={
-  c2:[
-    {tag:'商業科—社團+財經社',text:'高一至高二：羽球社\n每週固定訓練與校內聯賽，在雙打練習中學會與隊友溝通分工，培養抗壓性。\n\n高二起：投資理財研究社（副社長）\n學習股票、基金、複利等財務知識，操作虛擬投資組合。擔任副社長規劃每月主題課程，提升社員參與度。\n\n兩段社團讓我體會溝通協調的重要，確立了對企業管理的學習興趣。'},
-    {tag:'學科型—科學社+服務社',text:'高一至高二：自然科學研究社\n定期進行小組實驗與成果發表，培養邏輯思考與團隊合作。曾代表學校參加縣市科展，學習完整研究設計流程。\n\n高三：服務學習社（副社長）\n統籌校內外公益活動，負責招募社員、規劃課程與協調志工。理解組織管理的挑戰，激發了我對企管系的嚮往。'},
-    {tag:'藝術型—熱舞社+辯論社',text:'高一至高二：熱舞社\n每週排練並參與年度展演，在團體編舞中學習整合意見、培養協作默契。\n\n高三：辯論社\n接受系統性邏輯訓練，學習快速搜集資料、組織論點。在校際辯論賽擔任主辯，培養了沉穩的思辨能力。\n\n兩段截然不同的社團，讓我兼顧協作能力與邏輯訓練。'},
-  ],
-  c3:[
-    {tag:'三年班級幹部',text:'高一：班級學藝股長\n負責黑板報競賽，協調組員分工，獲全校前三名，初次體驗帶領團隊的成就感。\n\n高二：班級副班長\n擔任師生溝通橋樑，主持班會並記錄決議，學會在多方意見中尋求共識。\n\n高三：班級班長\n全面負責班級運作，帶領幹部籌備謝師宴與畢業紀念冊。三年歷練讓我從執行者成長為領導者。'},
-    {tag:'社團幹部為主',text:'高二：投資理財研究社副社長\n協助統籌社務，負責聯繫講師、規劃活動與社員招募。在資源有限中學習優先分配任務。\n\n高三：學生自治會活動組長\n規劃全校性活動（運動會、社團博覽會），帶領十人小組執行。在高壓中培養決策力，深刻理解溝通與分工的關鍵。'},
-    {tag:'跨領域幹部',text:'高一：班級衛生股長\n規劃輪值清掃制度，提升班級整潔效率，養成細心負責的態度。\n\n高二：科展隊長\n帶領四人小組完成縣市科展，負責研究規劃與成果報告，獲佳作。\n\n高三：畢業籌備委員會副主席\n規劃畢業典禮、謝師宴，對外協調廠商，提升專案管理與溝通能力。'},
-  ],
-  c4:[
-    {tag:'社區志工型',text:'班級環境整理\n每週參與清潔，負責教室整頓，培養對公共環境的責任感。\n\n社區關懷志工\n協助長者量血壓、陪伴聊天，學會傾聽與換位思考。\n\n校慶活動接待志工\n引導來賓並說明流程，鍛鍊臨場應變與表達能力。\n\n三年累計服務時數共 72 小時。'},
-    {tag:'課輔＋校內服務型',text:'課輔小老師\n連續兩年擔任低年級同學數學與商業概論課輔，培養耐心與因材施教的能力。\n\n圖書館志工\n每週協助整理館藏、引導借閱，養成系統化分類的習慣。\n\n三年累計服務時數共 58 小時。'},
-    {tag:'多元服務混合型',text:'班級環境整理\n擔任衛生股長，規劃輪值清掃制度，提升效率。\n\n社區淨灘活動\n參與海岸清潔，體驗環境保育的重要，強化團隊意識。\n\n老人日照中心志工\n設計並帶領長者進行手工藝活動，培養彈性思考與同理心。\n\n三年累計服務時數共 64 小時。'},
-  ],
-  c8:[
-    {tag:'競賽＋學業兼具',text:'學業表現\n在專業選修課程中成績名列班級前段，多次獲得書卷獎。\n\n競賽表現\n獲校內小論文比賽優等獎（主題：數位行銷對中小企業的影響），參加全國商業類技藝競賽榮獲優良獎。\n\n溝通與表達能力\n主持校慶開幕活動與班際辯論賽，具備良好台風與應對能力。'},
-    {tag:'語言與技能型',text:'語言能力\n通過全民英語檢定中級，具備基礎英語讀寫與口語能力，積極備考中高級。\n\n技能認證\n取得電腦技能基金會辦公室應用認證（Word、Excel），能製作結構清晰的提案文件。\n\n學科成就\n高一至高二商業概論成績穩定維持班級前15%，對產業分析有濃厚興趣。'},
-    {tag:'服務＋特殊表現型',text:'服務學習傑出表現\n三年累計服務時數超過 80 小時，獲導師特別表揚，代表班級接受服務熱心獎。\n\n競賽成果\n參加校內創意簡報競賽，以「永續時尚品牌策略」為題獲得佳作。\n\n其他特殊表現\n擔任學校開放日導覽志工，負責向國中生介紹科系特色，培養對外溝通能力。'},
-  ],
-  d1conc:[
-    {tag:'完整統整型',text:'三年高中生活，我從不同角色累積了扎實的學習歷程。擔任幹部讓我學會領導與溝通，社團培養了對組織管理的興趣，服務學習讓我理解換位思考，競賽與課業強化了邏輯思維。\n\n在這些歷練中，我確立了明確方向：對「如何讓組織有效運作」充滿好奇。\n\n進入朝陽科技大學企業管理系後，我期許透過實習機會、產業講座與專題研究，培養兼具理論基礎與實踐能力的管理視野。'},
-    {tag:'成長導向型',text:'如果要用一句話概括高中三年：「我學會了從事情裡學習，而不只是從課本裡學習。」\n\n從高一股長到高三班長，每個角色轉換都給了我不同視角。我發現真正的管理不是發號施令，而是了解每個人的強項，讓團隊發揮最大效能。\n\n這個體悟讓我對企業管理產生濃厚興趣。我希望在朝陽科技大學深化這些理解，建立完整的管理知識體系。'},
-    {tag:'目標清晰型',text:'三年透過幹部歷練、社團、服務與競賽，確立了目標——成為具備實務能力的企業管理人才。\n\n幹部工作讓我理解決策的重量；社團接觸財務與活動規劃的挑戰；服務培養同理心；競賽磨練表達與解決問題的能力。\n\n選擇朝陽科技大學企業管理系，因為系上強調理論與實務整合，正是進入職場前最需要的訓練。'},
-  ],
-  d2bio:[
-    {tag:'家庭背景驅動型',text:'從小在民主的家庭環境成長，父母給予充分自主空間，也要求我對自己負責。養成了獨立思考與承擔責任的習慣。\n\n國中畢業後選擇高職商業科，因商業管理的廣度與深度深深吸引著我。\n\n高中三年積極參與社團、幹部與服務，從每段經歷理解「管理」的真實意涵——不只是數字與決策，更是對人的理解與關懷。'},
-    {tag:'自主探索成長型',text:'我是喜歡主動探索的人。對「為什麼有些企業成功、有些卻失敗」充滿好奇，這驅動我選擇商業科。\n\n進入高職後，將課堂知識與日常觀察結合：逛超市時分析陳設、看新聞時思考企業策略、在社團嘗試活動企劃。\n\n三年下來，從充滿問號的學生，成長為能用管理視角分析問題的人，更期待在大學接受更嚴謹的訓練。'},
-  ],
-  d2motive:[
-    {tag:'課程興趣觸發型',text:'選擇企業管理系的動機，源自高中三年的商業學習體驗。在商業概論中第一次接觸行銷、財務、人資等概念，發現這些知識與日常生活的連結遠比想像中緊密。\n\n朝陽科技大學企業管理系重視理論與實務整合，提供豐富的產業合作與業師輔導資源，與我的期望高度契合。\n\n進入後計畫修習行銷管理與財務課程，爭取校外實習，為職場奠定紮實基礎。'},
-    {tag:'親身觀察激發型',text:'我對企業管理的興趣來自日常觀察。家人在地方上經營小型餐飲，我從小協助觀察進貨、客服、排班，意識到即使是小型商業也充滿管理學問。\n\n選擇朝陽科技大學企業管理系，因為系上兼顧理論與實務訓練，讓我透過個案分析與實習，真正理解企業運作全貌。\n\n進入後，期望累積足夠專業知識，為自己的管理職位打好根基。'},
-  ],
-  d2plan:[
-    {tag:'具體分項計畫型',text:'持續強化英語能力\n目標通過全民英檢中高級，為接觸國際商業資訊做準備。\n\n爭取校外實習\n希望大二或大三爭取行銷、業務或財務相關實習，將課堂知識轉化為實際能力。\n\n深化專業知識\n積極參與創業講座、產業論壇，拓展視野並建立人脈。\n\n取得專業證照\n在校期間考取商業類相關證照，強化履歷競爭力。'},
-    {tag:'全方位發展型',text:'學術面\n希望大二加入研究室或教師研究計畫，培養資料分析與學術寫作能力。\n\n實務面\n爭取業界實習，從基層業務或行政累積一線經驗。\n\n語言面\n深化英語能力，評估修讀商業日語，拓展跨國合作可能性。\n\n社群面\n參與系學會、創業社團，培養跨領域整合能力。'},
-  ],
-  d2reflect:[
-    {tag:'成長轉變型',text:'三年來從被動學習者成長為主動思考、積極實踐的行動者，是我最珍貴的改變。\n\n幹部讓我學會領導與解決問題；社團培養分工合作能力；學習中我清楚知道自己要什麼，態度是最大的資產。\n\n確信朝陽科技大學企業管理系將是我發展潛力、實現目標的最佳選擇。'},
-    {tag:'積極展望型',text:'回顧高中三年，每段努力讓我更了解自己的能耐與缺口。\n\n我認識到管理能力是一種思維方式——在資源有限下做最好的決策，持續修正方向。這在每次幹部任期、活動籌備中反覆體驗。\n\n進入朝陽科技大學企業管理系後，期待透過與師長、同學的互動，持續打磨思考框架，成為能創造真實價值的人。'},
-  ],
+// 圖片欄位全部改為陣列（最多 2 張）
+var fd={
+  school:'', dept:'', name:'',
+  // D1
+  c2:'', c2img:[], c3:'', c3img:[], c4:'', c4h:'', c4img:[], c8:'', c8img:[], d1conc:'',
+  // D2 — 移除 d2phone, d2email
+  d2roles:'', d2activities:'', d2competitions:'', d2traits:[],
+  d2bio:'', d2motive:'',
+  d2g1n:'', d2g1t:'', d2g1img:[], d2g2n:'', d2g2t:'', d2g3n:'', d2g3t:'',
+  d2c1n:'', d2c1t:'', d2c2n:'', d2c2t:'',
+  d2plan:'', d2reflect:'',
+  // D3
+  d3lang:'', d3langimg:[], d3awards:'', d3awardsimg:[],
+  d3projects:'', d3projectsimg:[], d3other:'', d3otherimg:[]
 };
 
+var TRAITS=['重視責任與合作','主動學習、持續精進','關心產業發展','邏輯清晰、善於分析','思考靈活、常有創意','規劃有條理、執行力強','表達清晰、溝通良好','穩定踏實、自我要求'];
+
+/* ════════════════════════════════════════════════════════
+   參考範例（每欄至少 2-3 份）
+══════════════════════════════════════════════════════════ */
+var EX={
+  /* ─── D1 ─── */
+  c2:[
+    {tag:'商業科 — 社團＋財經社',text:'高一至高二：羽球社\n每週固定訓練與校內聯賽，在雙打練習中學會與隊友有效溝通與分工，培養抗壓性與應變能力。\n\n高二起：投資理財研究社（副社長）\n學習股票、基金、複利計算等基礎財務知識，並實際操作虛擬投資組合。擔任副社長期間協助規劃每月主題課程，提升社員參與度與學習興趣。\n\n兩段社團經歷讓我體會溝通協調與計畫執行的重要，也確立了對企業管理知識的學習興趣。'},
+    {tag:'學科型 — 科學社＋服務社',text:'高一至高二：自然科學研究社\n定期進行小組實驗與成果發表，在討論分工中培養邏輯思考與團隊合作的能力。曾代表學校參加縣市科展，學習完整的研究設計流程。\n\n高三：服務學習社（副社長）\n協助社長統籌校內外公益活動，負責招募社員、規劃課程與協調志工時間。這段經歷讓我理解組織管理的挑戰，也激發了我對企業管理系的嚮往。'},
+    {tag:'藝術型 — 熱舞社＋辯論社',text:'高一至高二：熱舞社\n每週固定排練並參與年度成果展演，在團體編舞中學習傾聽、整合意見，培養協作默契與時間管理能力。\n\n高三：辯論社\n接受系統性邏輯訓練，學習快速搜集資料、組織論點並清楚表達立場。在校際辯論賽中擔任主辯，培養了沉穩的思辨能力與應對壓力的心態。\n\n這兩段截然不同的社團經歷，讓我兼顧了感性的協作能力與理性的邏輯訓練。'},
+  ],
+  c3:[
+    {tag:'三年班級幹部',text:'高一：班級學藝股長\n負責管理學習資源，規劃佈告欄設計，籌備班級黑板報競賽，協調組員分工，最終榮獲全校前三名，初次體驗帶領小型團隊的成就感。\n\n高二：班級副班長\n協助班長處理日常班務，擔任師生溝通橋樑，主持班會並記錄決議，在多方意見中尋求共識，學會理性溝通的重要性。\n\n高三：班級班長\n全面負責班級運作，帶領幹部籌備謝師宴與畢業紀念冊。從一開始的緊張到後來的自信決策，三年歷練讓我從執行者成長為領導者。'},
+    {tag:'社團幹部為主',text:'高二：投資理財研究社副社長\n協助社長統籌社務，負責聯繫外部講師、規劃主題活動與社員招募。在資源有限的情況下，學習如何優先分配任務並達成目標。\n\n高三：學生自治會活動組長\n負責規劃全校性活動（運動會、社團博覽會），帶領十人小組執行場地佈置、時程規劃與現場協調。在高壓環境中培養決策力，也深刻體認到溝通與分工在團隊管理中的關鍵角色。'},
+    {tag:'跨領域幹部',text:'高一：班級衛生股長\n負責每日環境分工與衛生檢查，養成對細節負責的態度，也學習在班級內維持公平的任務分配。\n\n高二：科展隊長\n帶領四人小組完成縣市科展作品，負責研究方向規劃、資料分析及成果報告撰寫。最終獲得佳作，這段跨科合作讓我認識到系統性思考與流程管理的重要。\n\n高三：畢業籌備委員會副主席\n協助規劃畢業典禮、謝師宴與班服設計，與各幹部分工並對外協調廠商，提升了專案管理與對外溝通的實戰能力。'},
+  ],
+  c4:[
+    {tag:'社區志工型',text:'班級環境整理\n每週固定參與校內清潔，負責教室周邊整頓與垃圾分類，培養對公共環境的責任感與自律習慣。\n\n社區關懷志工\n前往社區活動中心協助長者量血壓、陪伴聊天，在服務過程中學會傾聽與換位思考，理解不同族群的需求。\n\n校慶活動接待志工\n擔任接待組志工，引導來賓並說明活動流程，鍛鍊臨場應變與對外表達能力。\n\n三年累計服務時數共 72 小時。'},
+    {tag:'課輔＋校內服務型',text:'課輔小老師\n連續兩年擔任低年級同學的數學與商業概論課輔小老師，練習將複雜概念化繁為簡，同時培養耐心與因材施教的能力。這段經驗讓我對「教學即管理」有深刻體悟。\n\n圖書館志工\n每週一次協助整理館藏、引導同學借閱，養成系統化分類與細心查核的習慣。\n\n班際活動籌備志工\n協助學校運動會場地佈置與秩序維持，在高壓現場中磨練應變與配合團隊的能力。\n\n三年累計服務時數共 58 小時。'},
+    {tag:'多元服務混合型',text:'班級環境整理\n擔任衛生股長期間主動規劃輪值清掃制度，提升班級整潔效率，培養負責任的態度。\n\n社區淨灘活動\n參與學校組織的海岸清潔活動，親身體驗環境保育的重要，並在與同學的協作中強化團隊意識。\n\n老人日照中心志工\n協助日照中心設計並帶領長者進行手工藝活動，學習如何依據服務對象的需求調整計畫，培養彈性思考與同理心。\n\n三年累計服務時數共 64 小時，每次服務都讓我更堅定對於社會責任的認同。'},
+  ],
+  c8:[
+    {tag:'競賽＋學業兼具',text:'學業表現\n在專業選修課程中成績名列班級前段，多次獲得書卷獎，展現對商業知識的高度學習熱情與持續投入。\n\n競賽表現\n獲校內小論文比賽優等獎（主題：數位行銷對中小企業的影響），並參加全國商業類技藝競賽榮獲優良獎。\n\n溝通與表達能力\n曾主持校慶開幕活動與班際辯論賽，具備良好台風與即興應對能力，能清楚且自信地對外表達想法。'},
+    {tag:'語言與技能型',text:'語言能力\n通過全民英語檢定中級（初試＋複試），具備基礎英語讀寫與口語會話能力，目前積極備考中高級。\n\n技能認證\n取得電腦技能基金會辦公室應用認證（Word、Excel），並完成商業簡報實務課程，能製作結構清晰的提案文件。\n\n學科成就\n高一至高二商業概論成績穩定維持班級前 15%，對產業分析與行銷策略有濃厚興趣，常主動閱讀商業雜誌與個案報導。'},
+    {tag:'服務＋特殊表現型',text:'服務學習傑出表現\n三年累計服務時數超過 80 小時，獲導師特別表揚，並代表班級接受學校頒發的服務熱心獎。\n\n競賽成果\n參加校內創意簡報競賽，以「永續時尚品牌策略」為題獲得佳作，培養商業提案與視覺呈現能力。\n\n其他特殊表現\n擔任學校開放日的導覽志工，負責向國中生介紹科系特色，培養對外溝通與說明展示的實戰能力。同時以穩定出席率（三年出缺勤紀錄優良）展現自律與責任感。'},
+  ],
+  d1conc:[
+    {tag:'完整統整型',text:'三年高中生活，我從不同角色累積了扎實的學習歷程。擔任幹部讓我學會領導與溝通，社團活動培養了對財務與組織管理的興趣，服務學習讓我理解換位思考的重要，競賽與課業表現強化了邏輯思維與抗壓能力。\n\n在這些多元歷練中，我逐漸確立了一個明確方向：對「如何讓組織有效運作」充滿好奇，對商業決策背後的思維邏輯深感著迷。\n\n進入朝陽科技大學企業管理系後，我期許自己能將高中累積的實務態度帶入更系統化的專業學習，透過實習機會、產業講座與專題研究，培養兼具理論基礎與實踐能力的管理視野。'},
+    {tag:'成長導向型',text:'如果要用一句話概括我的高中三年，我想說：「我學會了從事情裡學習，而不只是從課本裡學習。」\n\n從高一的股長到高三的班長，從旁觀社團到擔任副社長，每一個角色轉換都給了我不同的視角。我發現，真正的管理不是發號施令，而是了解每個人的強項，找到讓團隊發揮最大效能的方法。\n\n這個體悟讓我對企業管理這個領域產生了濃厚的興趣。我希望在朝陽科技大學企業管理系的學習中，深化這些直覺性的理解，建立更完整的管理知識體系，成為一個真正懂得帶領人、創造價值的管理者。'},
+    {tag:'目標清晰型',text:'高中三年，我透過幹部歷練、社團經驗、服務學習與競賽參與，具體確立了未來的目標——成為一名具備實務能力與創新思維的企業管理人才。\n\n幹部工作讓我理解決策的重量；社團讓我接觸財務與活動規劃的實際挑戰；服務讓我學會同理與回應需求；競賽則讓我在壓力中磨練表達與解決問題的能力。\n\n我選擇朝陽科技大學企業管理系，是因為系上強調理論與實務的整合，正是我認為踏入職場前最需要的訓練。我期待在這裡深耕專業知識，透過業師合作與實習機會，為自己的職涯奠定紮實的根基。'},
+  ],
+  /* ─── D2 ─── */
+  d2roles:[
+    {tag:'學業領導型（適合勤學者）',text:'高一：英文小老師\n高二：商業概論小老師\n高二：班級學藝股長\n高三：班級副班長\n高三：學科競賽校隊隊員'},
+    {tag:'班級幹部型（適合穩定踏實）',text:'高一：班級衛生股長\n高二：班級風紀股長\n高二：班級副班長\n高三：班級班長\n高三：畢業籌備委員會副主席'},
+    {tag:'社團組織型（適合外向積極）',text:'高一：投資理財研究社社員\n高二：投資理財研究社副社長\n高二：學生自治會活動組組員\n高三：學生自治會活動組長\n高三：班級班長'},
+    {tag:'多元歷練型（適合斜槓型）',text:'高一：班級康樂股長\n高一：羽球校隊副隊長\n高二：商業科科學會學藝股長\n高二：服務學習社副社長\n高三：畢業紀念冊主編'},
+  ],
+  d2activities:[
+    {tag:'學術活動為主',text:'高一：校內英文演講比賽（入圍決選）\n高二：商業類學科能力競賽\n高二：科展縣賽（佳作）\n高三：自主學習計畫——數位行銷個案研究\n高三：商業簡報實務工作坊'},
+    {tag:'社團與競賽',text:'高一至高二：投資理財研究社\n高二：班際杯籃球賽（八強）\n高二：模擬聯合國活動（外交組）\n高三：辯論社校際公開賽\n高三：畢業典禮籌備總召'},
+    {tag:'公益與服務',text:'高一：校內慈幼社\n高二：偏鄉教育志工營（七天）\n高二：海岸淨灘公益活動\n高三：社區關懷志工（每月一次）\n高三：學長姐課輔計畫'},
+    {tag:'藝文與運動',text:'高一：校慶大隊接力（班級代表）\n高二：合唱團公開演出\n高二：校刊編輯小組\n高三：畢業成果展視覺設計組\n高三：書法比賽校內銀牌'},
+  ],
+  d2competitions:[
+    {tag:'學科競賽（含校外）',text:'高二：全國商業類技藝競賽——優良獎\n高二：學科能力競賽（商業概論）——佳作\n高三：英文閱讀理解競賽——校內第二名\n高三：全國高中生小論文比賽——入選'},
+    {tag:'創意提案類',text:'高二：校內創意簡報競賽——優等\n高二：青少年創新提案大賽——佳作\n高三：商業模式競賽（永續主題）——銀獎\n高三：行銷企劃書甄選——入圍決賽'},
+    {tag:'體育藝文類',text:'高一：班際杯籃球賽——亞軍\n高二：校歌比賽（班級組）——優等\n高二：書法比賽——校內銅牌\n高三：班際拔河賽——冠軍'},
+    {tag:'綜合多元型',text:'高一：班際排球錦標賽——亞軍\n高二：校內商業簡報競賽——優等\n高二：縣市科展（商業類）——佳作\n高三：全民英檢中級複試——通過\n高三：校內服務楷模獎——獲頒'},
+  ],
+  d2bio:[
+    {tag:'家庭背景驅動型',text:'從小在民主的家庭環境成長，父母給予充分的自主空間，但也要求我學會對自己負責。這樣的成長背景讓我養成獨立思考與承擔責任的習慣，在遇到困難時不輕易放棄，而是主動尋找解決方法。\n\n國中畢業後毫不猶豫選擇高職商業科，是因為商業管理的廣度與深度深深吸引著我。透過新聞與親友的商業背景，我認識到商業知識的無限可能，這份好奇心驅使我投入三年的系統學習。\n\n在高中三年中，除了努力學業，也積極參與社團、幹部與服務活動，從每一段經歷中理解「管理」的真實意涵——不只是數字與決策，更是對人的理解與關懷。'},
+    {tag:'自主探索成長型',text:'我是一個喜歡主動探索的人。國小時就習慣在圖書館翻閱各種書籍，對於「為什麼有些企業會成功、有些卻失敗」充滿好奇。這份對商業世界的疑問，成為驅動我選擇商業科的最初動力。\n\n進入高職後，我努力將課堂知識與日常觀察結合：逛超市時分析陳設邏輯、看新聞時思考企業策略、在社團中嘗試活動企劃。這些習慣讓我養成了系統性思考的能力，也讓我逐漸確信，企業管理是我想深入學習的領域。\n\n三年下來，我從一個對商業充滿問號的學生，成長為能用管理視角分析問題的人。這段歷程讓我更清楚自己的方向，也更期待在大學中接受更嚴謹的訓練。'},
+    {tag:'從興趣到使命型',text:'我來自一個重視教育的家庭，父母從不要求我考多高的分數，但總會問：「你今天學到什麼？」這樣的氛圍養成了我把學習當成日常、而不是任務的習慣。\n\n國中時，因為一次社區活動的契機，我接觸到「行銷」這個概念，開始好奇為什麼一個產品能讓人主動掏錢、而另一個只能躺在貨架上。這份好奇心引領我選擇商業科，並在三年的學習中逐步從興趣變成志向。\n\n我希望未來能成為一個真正了解商業運作、並能為社會帶來正面改變的管理者，這也是我選擇朝陽科技大學企業管理系最深層的原因。'},
+  ],
+  d2motive:[
+    {tag:'課程興趣觸發型',text:'選擇就讀企業管理系的動機，源自高中三年累積的商業學習體驗。在商業概論課程中，第一次系統性接觸行銷、財務、人資等管理概念，發現這些知識與日常生活的連結遠比想像中緊密。\n\n在研究朝陽科技大學企業管理系的過程中，注意到系上重視理論與實務的整合，提供豐富的產業合作機會與業師輔導資源。這與我希望同步累積實務經驗的期望高度契合。\n\n進入企管系後，計畫積極修習行銷管理與財務相關課程，爭取校外實習機會，並參與系上舉辦的各類產業講座，為未來進入職場奠定紮實基礎。'},
+    {tag:'親身觀察激發型',text:'我對企業管理的興趣，並非來自課本，而是來自日常的觀察與思考。家人在地方上經營小型餐飲店，我從小就在旁協助，觀察到從進貨管理、客戶服務到員工排班，每個環節都牽涉到系統性的決策與資源分配。這讓我意識到，即使是小型商業也充滿了管理的學問。\n\n選擇朝陽科技大學企業管理系，是因為系上兼顧理論基礎與實務訓練，讓我能在紮實的學科背景下，透過個案分析與實習，真正理解企業運作的全貌。\n\n進入系所後，我期望能夠累積足夠的專業知識，回頭幫助家人優化營運模式，也為自己未來進入管理職位打下堅實根基。'},
+    {tag:'實務導向型',text:'高中三年的幹部經驗讓我體會到，管理不只是書本上的章節，而是在資源有限、時間緊迫下，如何把對的人放在對的位置上。每一次活動籌備、每一次衝突協調，都讓我更想深入了解管理背後的邏輯。\n\n選擇朝陽科技大學企業管理系，最直接的理由是它強調「做中學」的教學取向。系上的業師制度、企業參訪與實習合作，讓我有機會在大學階段就接觸真實的企業現場。\n\n我期待透過系上完整的訓練，把高中的實作直覺，轉化為更專業、更可被檢驗的管理能力。'},
+  ],
+  d2g1t:[
+    {tag:'從理論到實作型',text:'這門課讓我第一次體會到課本知識如何轉化為實際應用。課堂上學到的概念框架，原本看似抽象，但在實作專題中親自操作後，才真正理解每一個步驟背後的意義。\n\n最大的收穫不是分數，而是學會了主動將理論連結到日常觀察，培養出「凡事都能用學科視角分析」的思維習慣，這對我後續學習其他商業課程帶來了深遠的影響。'},
+    {tag:'從困難到突破型',text:'這門課一開始對我而言並不容易，公式運算與案例分析並進，常常在練習題上卡關。我嘗試建立自己的筆記系統：每讀完一個章節就用自己的話寫一份摘要，並把不懂的部分整理成問題清單向老師請教。\n\n經過一個學期的累積，我從成績中段慢慢進步到班級前 20%。這段過程讓我體會到，遇到困難不是放棄的理由，而是建立學習方法的契機。'},
+    {tag:'從興趣到深化型',text:'這門課是我接觸管理知識的起點。隨著學期推進，我對課程內容的興趣不減反增，主動延伸閱讀相關書籍與案例報導，也開始觀察日常生活中的商業現象。\n\n這份興趣讓我願意花更多時間投入，最後不只在學科表現上有所成長，也對自己未來的學習方向產生更明確的方向感——我發現自己真正想做的，是在企業管理領域繼續深耕。'},
+  ],
+  d2g2t:[
+    {tag:'扎實累積型',text:'這門課強調穩定的累積與細心的求證。我習慣在每堂課後立即整理筆記，並用例題自我練習，把容易混淆的觀念用對比表格呈現。\n\n這段學習過程不只讓我掌握了學科內容，更讓我建立了一套可遷移的學習方法——把複雜知識拆解、分類、再重組。這份能力後來在其他課程上同樣派上用場。'},
+    {tag:'觀察應用型',text:'這門課讓我學會用學科視角觀察周遭世界。每次學到新概念，我都會試著在生活中找對應的例子：例如逛便利商店時觀察陳列邏輯、看新聞時思考企業決策。\n\n這種「從生活找學問」的習慣，讓抽象的理論變得具體，也讓我體會到商業學科的實用價值——知識不只是考試題目，而是真正可用來理解世界的工具。'},
+    {tag:'反思內化型',text:'這門課最大的挑戰，不是內容難度，而是如何把所學內化為自己的觀點。課程中老師常拋出開放性問題，鼓勵我們表達看法。\n\n剛開始我會擔心答錯，但漸漸地，我學會在發言前先沉澱、整理思路，並用結構化的方式表達。這段訓練讓我在後續課程的個案討論與報告呈現上，都能更有條理地論述自己的想法。'},
+  ],
+  d2g3t:[
+    {tag:'團隊合作型',text:'這門課透過大量的小組合作完成階段性報告。一開始我們組內分工不清，常因進度落差產生摩擦。於是我主動提議建立共享的進度表與週會制度，讓每個人都清楚自己的責任與時程。\n\n這段經驗讓我學到，團隊合作的核心不是「我做了多少」，而是「我如何讓整個團隊運轉得更順」。這份理解，正是企業管理最核心的課題之一。'},
+    {tag:'解決問題型',text:'這門課讓我第一次完整經歷「發現問題—分析原因—提出解法—驗證成效」的思考流程。我學會在面對任何題目時，不急著答題，而是先把問題拆解清楚。\n\n這套思維方式不只用在學科上，也滲透到我日常的決策——選社團、規劃時間、處理人際——都讓我變得更有條理。'},
+    {tag:'跨域整合型',text:'這門課讓我意識到，商業知識並不是孤立存在，而是與資訊科技、社會議題、消費心理交織在一起。我嘗試把其他課程學到的概念帶入這門課的作業中，例如用社會學視角分析消費者行為。\n\n這種跨領域的整合練習，讓我體會到企業管理的多元性，也激發了我未來想在大學接觸更廣泛知識的渴望。'},
+  ],
+  d2c1t:[
+    {tag:'多元選修型',text:'這門課程結合了實務操作與業師授課，讓我接觸到課本以外的商業現場。\n\n印象最深的是模擬經營一家小型零售店，從定位、選品、訂價到行銷文案，每個決策都牽涉到資源分配與消費者洞察。在過程中，我深刻體會到商業決策從來不是單一答案，而是在多個變數中找出最佳解的能力。\n\n這段經驗讓我更確信自己對企業管理的興趣，也學到了許多書本無法傳達的實務智慧。'},
+    {tag:'自主學習型',text:'我選擇以「中小企業數位轉型」作為自主學習主題，從定義範圍、文獻搜集、案例分析到產出書面報告，全程自己規劃與執行。\n\n這個過程最大的挑戰是時間管理——沒有人在後面催進度，必須自己設定階段性目標並嚴格自律。最終我完成一份近 8000 字的報告，被老師肯定為班級代表作品。\n\n這段歷程讓我培養了獨立研究的能力，也驗證了自己面對長期任務的執行力。'},
+    {tag:'小論文型',text:'我與兩位同學共同完成了「台灣手搖飲品牌策略比較」的小論文。我們從消費者問卷設計、訪談、資料分析到報告撰寫，分工合作完成。\n\n我負責問卷設計與資料分析的部分，學會了基本的統計方法與圖表呈現技巧。最重要的收穫是，原來商業研究可以這麼嚴謹——每一個結論背後都需要證據支撐。\n\n這份小論文最終獲得校內優等獎，也激發了我對學術研究的興趣。'},
+  ],
+  d2c2t:[
+    {tag:'實作工作坊型',text:'這門課是與業師合作的實務工作坊，我們有機會走進真實的企業環境參訪。\n\n令我印象最深的是一場「企業簡報模擬」——我們以實際公司為對象，準備一份提案簡報並向業師發表。從資料蒐集、簡報架構、視覺設計到口頭表達，每個環節都讓我看到自己的不足，也得到了非常具體的回饋。\n\n這段經驗讓我學會了「站在客戶角度思考」的重要性，也大幅提升了我的簡報能力與商業敏感度。'},
+    {tag:'專題研究型',text:'這門課要求每組完成一份完整的專題研究報告。我們組選擇「永續品牌的消費者認知差異」作為主題。\n\n我擔任資料分析組長，負責設計問卷並用 Excel 進行交叉分析。這段經驗讓我第一次接觸到較進階的資料處理工具，也學會用視覺化方式呈現研究結果。\n\n最後我們的報告獲得班級評選第二名，這次經驗讓我對量化研究產生了更高的興趣，也是我希望在大學進一步深化的方向。'},
+    {tag:'創意實作型',text:'這門課強調動手做。我們需要在學期內提出一個原創的商業企劃，並實際嘗試小規模測試。\n\n我與組員選擇了「校園文具二手交流」的點子，從社群行銷、訂價策略到實際擺攤，全程都由我們自主規劃。雖然最後的營業額不高，但我們完整經歷了一次「從想法到行動」的商業循環。\n\n這份經驗讓我體會到，創業與管理需要的不只是好點子，更是把點子落地的執行力與堅持。'},
+  ],
+  d2plan:[
+    {tag:'具體分項計畫型',text:'持續強化英語能力\n目標通過全民英檢中高級，累積學術與商業英文閱讀能力，為未來接觸國際商業資訊與個案做好準備。\n\n爭取校外實習\n希望在大二或大三時爭取企業實習機會，優先考慮行銷、業務或財務相關職位，將課堂知識轉化為實際工作能力。\n\n深化專業知識\n積極參與系上及校內的創業講座、產業論壇與學術研討活動，拓展視野並建立人脈。\n\n取得專業證照\n規劃在校期間考取商業類相關證照（如企業管理師、行銷認證），強化履歷競爭力。'},
+    {tag:'全方位發展型',text:'學術與研究面\n希望在大二加入系上研究室或參與教師研究計畫，培養資料分析與學術寫作能力，為未來升學或企業研發崗位做準備。\n\n實務與職涯面\n積極爭取業界實習機會，從基層業務或行政工作中累積一線經驗，理解組織運作的實際挑戰。\n\n語言與國際視野\n持續深化英語能力，並評估修讀商業日語或選修國際企業管理相關課程，拓展未來跨國合作的可能性。\n\n社群與人脈面\n參與系學會、創業社團等校內組織，與來自不同科系的同學合作，培養跨領域整合能力。'},
+    {tag:'目標導向型',text:'我為自己設定了三個階段性目標：\n\n大一：扎根期\n打好專業基礎課程，並通過英檢中高級。同時加入系學會擔任幹部，熟悉系上資源與生態。\n\n大二至大三：實戰期\n爭取至少一次正式企業實習，並參與一次跨校的商業競賽。同時透過選修課程確認未來專長方向。\n\n大四：整合期\n完成專題研究，並評估升學或就業方向。希望以扎實的作品集（實習成果＋競賽紀錄＋專題）為自己的大學生涯做最好的總結。'},
+  ],
+  d2reflect:[
+    {tag:'成長轉變型',text:'三年來從被動學習者成長為主動思考與積極實踐的行動者，是我最珍貴的改變。\n\n幹部經驗讓我學會如何領導團隊、溝通協調並解決問題；社團活動培養了分工合作與規劃活動的能力；學習過程中，我清楚知道自己想要什麼，態度是我最大的資產。\n\n在這些歷程中，不斷反思並逐步確立升學方向，確信朝陽科技大學企業管理系將是我發展潛力、實現目標的最佳選擇。'},
+    {tag:'積極展望型',text:'回顧高中三年，我在學業、社團、服務與競賽各個面向的努力，雖然成果不一定最亮眼，但每一段過程都讓我更了解自己的能耐與缺口。\n\n我認識到，管理能力不只是技術，更是一種思維方式——在資源有限的情況下做出最好的決策，並持續修正方向。這正是我在每一次幹部任期、每一次活動籌備中反覆體驗的核心。\n\n進入朝陽科技大學企業管理系後，我不只希望習得專業知識，更期待透過與教授、業師、同學的互動，持續打磨自己的思考框架，成為一個在商業環境中能夠創造真實價值的人。'},
+    {tag:'結語有力型',text:'三年的學習，最大的收穫不是某一張證書、某一個獎項，而是學會了「對自己誠實」這件事。\n\n我清楚自己擅長什麼、不足什麼；清楚自己對哪些事情真心好奇、對哪些只是表面興趣。這份自我認識，讓我選擇朝陽科技大學企業管理系時不是隨波逐流，而是經過深思熟慮的決定。\n\n我相信，帶著這份清醒進入大學，我能更專注、更主動、也更有方向地去吸收每一份知識，並把所學轉化成真正屬於自己的能力。'},
+  ],
+  /* ─── D3 ─── */
+  d3lang:[
+    {tag:'英檢中級型',text:'全民英語檢定中級——通過初試與複試（高二取得）\nGEPT 中級檢定證書，具備基礎英語讀、寫、聽、說能力。\n\n目前正積極準備中高級檢定，目標於大一上學期前取得，作為未來修習國際商業課程與閱讀英文文獻的基礎。'},
+    {tag:'多益測驗型',text:'TOEIC 多益測驗——綜合分數 650 分（高三取得）\nListening 340 / Reading 310，具備一定的商業英文閱讀與聽力理解能力。\n\n預計大一升大二時再次應試，目標達到 750 分以上，符合進入外商企業實習的基本門檻。'},
+    {tag:'多語檢定型',text:'全民英語檢定中級——通過（高二取得）\n日語檢定 N4——通過（高三取得，自學備考）\n\n語言學習對我而言不只是考試，更是接觸不同文化與商業思維的窗口。未來希望在大學期間持續精進英文，並評估加修商業日語，培養未來進入跨國企業的競爭力。'},
+  ],
+  d3awards:[
+    {tag:'學業類獎項',text:'高一上學期：學業成績書卷獎（班排第三）\n高一下學期：學業成績書卷獎（班排第二）\n高二上學期：商業類專業科目組第一名\n高三：畢業總平均班級前 10%，獲頒成績優異獎\n\n這些獎項代表的不是聰明，而是穩定累積的學習態度。我相信這份自律是面對大學課業最重要的基礎。'},
+    {tag:'競賽類獎項',text:'高二：全國商業類技藝競賽——優良獎\n高二：校內創意簡報競賽——優等獎（永續品牌主題）\n高二：縣市科展——商業類組佳作\n高三：全國高中生小論文比賽——入選\n高三：商業模式競賽——銀獎（共 60 隊參賽）\n\n每一次的競賽不只是一個結果，更是一次對自己思考能力與抗壓性的真實檢驗。'},
+    {tag:'服務與綜合類',text:'高一：班級榮譽獎（衛生競賽連續四週第一）\n高二：服務楷模獎（服務時數累計 60 小時）\n高三：校內志工貢獻獎（累計服務時數超過 80 小時）\n高三：校長嘉獎（畢業籌備優秀貢獻）\n\n這些獎項不是榮耀，而是肯定——肯定我在團體中願意多付出一份心力的態度。'},
+  ],
+  d3projects:[
+    {tag:'商業主題型',text:'高三自主學習計畫——「台灣手搖飲品牌策略比較」\n選擇本土三大手搖飲品牌作為研究對象，從品牌定位、價格帶、社群行銷三個面向進行比較分析。\n\n研究方法：\n● 網路爬蟲蒐集近一年社群貼文與互動數據\n● 設計線上問卷（有效回覆 150 份）\n● 個案訪談店家經理一位\n\n最終產出：8000 字研究報告＋簡報發表，獲老師評為班級代表作品。\n\n這次經驗讓我接觸到完整的商業研究流程，也對行銷策略產生濃厚興趣。'},
+    {tag:'永續/社會議題型',text:'高三課堂專題——「校園廢棄物管理改善方案」\n以校內回收動線為觀察對象，發現分類不確實導致回收率低下的問題。\n\n團隊分工：\n● 我負責問卷設計與資料分析\n● 組員 A 負責動線觀察與紀錄\n● 組員 B 負責方案提案與簡報\n\n最後我們提出三項改善建議，並向學務處正式提案。其中「圖示化分類標誌」的建議被學校採納，目前已實施。\n\n這段經驗讓我體會到，商業思維不只是賺錢，更可以為公共議題提供解方。'},
+    {tag:'科技/創新型',text:'高二多元選修課程專題——「AI 智慧製造的應用案例研究」\n探討近年 AI 技術在製造業的實際應用，並評估對產業就業結構的影響。\n\n研究內容：\n● 蒐集國內外 5 個典型案例\n● 整理產業導入 AI 的關鍵成功因素\n● 訪談科技業家人，理解現場實作觀點\n\n最終產出：簡報＋3000 字摘要，於課堂公開發表並獲老師肯定。\n\n這份專題讓我意識到，未來的管理者必須同時具備產業知識與科技敏感度，這也是我希望在大學進一步加強的方向。'},
+  ],
+  d3other:[
+    {tag:'校園參與型',text:'校園開放日學系導覽志工\n連續兩年擔任商業科導覽志工，向國中生與家長介紹科系特色、課程內容與升學方向。透過反覆的解說與問答，提升了我的對外溝通能力與表達自信。\n\n校長有約座談會\n高三時受推薦參與「校長有約」對話活動，代表學生提出對校園學習資源的建議，學會在正式場合中清楚有禮地表達訴求。\n\n出缺勤紀錄\n三年全勤紀錄優良，未請任何病假與事假，展現自律與責任感。'},
+    {tag:'證照與技能型',text:'已取得證照\n● 電腦技能基金會 TQC 辦公室應用認證（Word、Excel）\n● 全民英語檢定中級\n● 商業簡報實務工作坊結業證書\n\n進行中的學習\n● TOEIC 多益測驗備考中（目標 750 分）\n● Excel 進階函數自學中\n● 商業書籍每月閱讀計畫（已累積閱讀 18 本）\n\n持續學習與證照規劃，是我為大學階段預先做好的準備。'},
+    {tag:'特殊經歷型',text:'校外短期參訪\n高二暑假參加「青年商業領袖營」三天兩夜活動，與來自全國各高中的學生共同模擬企業經營決策，獲得「最佳團隊獎」。\n\n業界接觸經歷\n高三寒假至家人經營的小型餐飲店實地觀察並協助營運（兩週），近距離理解小型商業的進貨、客服、人員調度等實務挑戰。\n\n社群經營經驗\n獨立經營一個高中生讀書帳（Instagram），分享學科筆記與自學方法，目前累計 1200 位追蹤。透過這個經驗實際操作社群行銷，了解內容創作與受眾互動的真實樣貌。'},
+  ]
+};
+
+var EX_LABELS={
+  c2:'C-2 社團活動', c3:'C-3 幹部經驗', c4:'C-4 服務學習', c8:'C-8 特殊優良表現',
+  d1conc:'多元表現結論',
+  d2roles:'幹部經歷', d2activities:'活動參與', d2competitions:'競賽表現',
+  d2bio:'自傳', d2motive:'就讀動機',
+  d2g1t:'科目一心得', d2g2t:'科目二心得', d2g3t:'科目三心得',
+  d2c1t:'課程成果一描述', d2c2t:'課程成果二描述',
+  d2plan:'未來學習計畫', d2reflect:'學習歷程反思',
+  d3lang:'語言檢定證書', d3awards:'競賽獲獎紀錄', d3projects:'專題成果與課堂報告', d3other:'其他有利審查資料'
+};
+
+/* ════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════ */
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function exbtn(key,lbl){
+  var n=(EX[key]||[]).length;
+  return'<button class="ex-btn" data-ex="'+key+'"><span class="ex-spark">✦</span>參考範例 — '+lbl+(n?' · '+n+' 種寫法':'')+'</button>';
+}
+
+// 圖片區（最多 2 張）
+function iz(key){
+  var imgs=fd[key]||[];
+  var has=imgs.length>0;
+  var html='<div class="iz-wrap'+(has?' has':'')+'">';
+  html+='<div class="iz-hint"><span class="iz-tag">最多 2 張</span>請選最重要的圖片（'+imgs.length+'/2）</div>';
+  html+='<div class="iz-grid">';
+  imgs.forEach(function(src,i){
+    html+='<div class="iz-item">'
+        +'<img src="'+src+'">'
+        +'<button class="iz-rm" data-rm="'+key+'" data-rmi="'+i+'">✕</button>'
+        +'</div>';
+  });
+  if(imgs.length<2){
+    html+='<div class="iz-add" data-zone="'+key+'">'
+        +'<div class="iz-add-icon">＋</div>'
+        +'<div class="iz-add-txt">'+(imgs.length===0?'點擊上傳':'再加一張')+'</div>'
+        +'</div>';
+  }
+  html+='</div></div>';
+  html+='<input type="file" id="f_'+key+'" accept="image/*" data-for="'+key+'">';
+  return html;
+}
+
+function traitsHTML(){
+  return'<div class="traits-grid">'+TRAITS.map(function(t,i){
+    var on=fd.d2traits.indexOf(t)>=0;
+    return'<label class="trait-item'+(on?' on':'')+'" data-trait="'+i+'"><span class="ck"></span><span>'+t+'</span></label>';
+  }).join('')+'</div>';
+}
+
+function heroMark(line2,line3){
+  var nums=['I','II','III'];
+  return'<div class="hero-mark"><div class="hero-mark-emblem">'+nums[doc]+'</div><div class="hero-mark-text"><div class="l1">CHAOYANG · BUSINESS ADMIN</div><div class="l2">'+line2+'</div><div class="l3">'+line3+'</div></div></div>';
+}
+
+/* ════════════════════════════════════════════════════════
+   表單步驟
+══════════════════════════════════════════════════════════ */
+var D1=[
+  function(){return'<div class="card">'+heroMark('封面基本資訊','三份文件共用，填一次即可')
+    +'<div class="fr"><div><label class="req">畢業學校</label><input type="text" data-f="school" placeholder="例：國立台中附工" value="'+esc(fd.school)+'"></div>'
+    +'<div><label class="req">畢業科系</label><input type="text" data-f="dept" placeholder="例：商業經營科" value="'+esc(fd.dept)+'"></div></div>'
+    +'<div class="fg"><label class="req">申請人姓名</label><input type="text" data-f="name" placeholder="請填寫全名" value="'+esc(fd.name)+'"></div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">C-2</div><div><h2>社團活動</h2><small>高中三年社團參與、角色、收穫</small></div></div>'
+    +exbtn('c2','社團活動')
+    +'<textarea class="tf" data-f="c2" placeholder="高一至高二：社團名稱\n活動內容與收穫。\n\n高二起：社團名稱（職稱）\n具體活動、學到的能力。">'+esc(fd.c2)+'</textarea>'
+    +'<div class="fg" style="margin-top:10px"><label>相關照片</label>'+iz('c2img')+'</div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">C-3</div><div><h2>幹部經驗</h2><small>各年級擔任幹部職責與貢獻</small></div></div>'
+    +exbtn('c3','幹部經驗')
+    +'<textarea class="tf" data-f="c3" placeholder="高一：職稱\n負責事項與成果。\n\n高二：職稱\n負責事項與成果。">'+esc(fd.c3)+'</textarea>'
+    +'<div class="fg" style="margin-top:10px"><label>相關照片</label>'+iz('c3img')+'</div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">C-4</div><div><h2>服務學習</h2><small>各類服務活動與反思</small></div></div>'
+    +exbtn('c4','服務學習')
+    +'<textarea class="tf" data-f="c4" placeholder="班級環境整理\n內容與收穫。\n\n社區志工\n地點、內容與反思。">'+esc(fd.c4)+'</textarea>'
+    +'<div class="fr" style="margin-top:10px"><div><label>累計服務時數</label><input type="text" data-f="c4h" placeholder="例：72 小時" value="'+esc(fd.c4h)+'"></div>'
+    +'<div><label>相關照片</label>'+iz('c4img')+'</div></div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">C-8</div><div><h2>特殊優良表現</h2><small>競賽、學業、特殊能力等佐證</small></div></div>'
+    +exbtn('c8','特殊表現')
+    +'<textarea class="tf" data-f="c8" placeholder="學業表現\n成績、排名、獎項。\n\n競賽表現\n比賽名稱與獎項。">'+esc(fd.c8)+'</textarea>'
+    +'<div class="fg" style="margin-top:10px"><label>獎狀或照片</label>'+iz('c8img')+'</div></div>';},
+  function(){return'<div class="notice"><div class="ico">🎉</div><div><h3>D1 最後一步！</h3><p>完成後可按「👁 預覽」，再按「📄 下載 PDF」</p><div class="tag">⚠️ 生成需 20–35 秒</div></div></div>'
+    +'<div class="card"><div class="ch"><div class="sb" style="line-height:1.3">結<br>論</div><div><h2>多元表現總整心得</h2><small>統整三年，呼應選擇企管系的動機</small></div></div>'
+    +exbtn('d1conc','總整結論')
+    +'<textarea class="tf" data-f="d1conc" style="min-height:160px" placeholder="① 統整幹部、社團、服務、競賽各類成長\n② 說明如何確立對企管的興趣\n③ 表達就讀朝陽企管系的期望">'+esc(fd.d1conc)+'</textarea></div>';},
+];
+
+var D2=[
+  function(){return'<div class="card">'+heroMark('個人簡歷','封面資訊沿用 D1 設定')
+    +'<div class="fg"><label>幹部經歷（每行一條）</label>'
+    +exbtn('d2roles','幹部經歷')
+    +'<textarea class="tf" data-f="d2roles" style="min-height:90px" placeholder="高一英文小老師\n高二商業概論小老師">'+esc(fd.d2roles)+'</textarea></div>'
+    +'<div class="fg"><label>活動參與（每行一條）</label>'
+    +exbtn('d2activities','活動參與')
+    +'<textarea class="tf" data-f="d2activities" style="min-height:90px" placeholder="高一：羽球隊幹部">'+esc(fd.d2activities)+'</textarea></div>'
+    +'<div class="fg"><label>競賽表現（每行一條）</label>'
+    +exbtn('d2competitions','競賽表現')
+    +'<textarea class="tf" data-f="d2competitions" style="min-height:90px" placeholder="班際杯籃球賽第一名">'+esc(fd.d2competitions)+'</textarea></div>'
+    +'<div class="fg"><label>個人特質（可複選）</label>'+traitsHTML()+'</div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>自傳</h2></div></div>'
+    +exbtn('d2bio','自傳')
+    +'<textarea class="tf" data-f="d2bio" style="min-height:170px" placeholder="① 家庭背景與成長環境\n② 求學過程與重要轉折\n③ 個人特質與興趣專長">'+esc(fd.d2bio)+'</textarea></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>就讀動機</h2></div></div>'
+    +exbtn('d2motive','就讀動機')
+    +'<textarea class="tf" data-f="d2motive" style="min-height:170px" placeholder="① 對企業管理的興趣從何而來\n② 了解朝陽企管系的契機\n③ 就讀後的期望">'+esc(fd.d2motive)+'</textarea></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>學習歷程—成績</h2><small>科目一、二的學習心得</small></div></div>'
+    +'<div class="fg"><label class="req">科目一</label><input type="text" data-f="d2g1n" placeholder="例：會計學" value="'+esc(fd.d2g1n)+'"></div>'
+    +'<div class="fg"><label>心得</label>'+exbtn('d2g1t','科目一心得')
+    +'<textarea class="tf" data-f="d2g1t" style="min-height:95px" placeholder="遇到的困難、克服方法、成長。">'+esc(fd.d2g1t)+'</textarea></div>'
+    +'<div class="fg"><label class="req">科目二</label><input type="text" data-f="d2g2n" placeholder="例：經濟概論" value="'+esc(fd.d2g2n)+'"></div>'
+    +'<div class="fg"><label>心得</label>'+exbtn('d2g2t','科目二心得')
+    +'<textarea class="tf" data-f="d2g2t" style="min-height:95px" placeholder="描述學習過程與收穫。">'+esc(fd.d2g2t)+'</textarea></div>'
+    +'<div class="fg"><label>佐證照片</label>'+iz('d2g1img')+'</div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>成績（科目三）＆課程成果</h2></div></div>'
+    +'<div class="fg"><label class="req">科目三</label><input type="text" data-f="d2g3n" placeholder="例：商業概論" value="'+esc(fd.d2g3n)+'"></div>'
+    +'<div class="fg"><label>心得</label>'+exbtn('d2g3t','科目三心得')
+    +'<textarea class="tf" data-f="d2g3t" style="min-height:90px" placeholder="描述學習過程與收穫。">'+esc(fd.d2g3t)+'</textarea></div>'
+    +'<div class="fg"><label>課程成果一</label><input type="text" data-f="d2c1n" placeholder="例：高二多元選修—商業經營實務" value="'+esc(fd.d2c1n)+'"></div>'
+    +'<div class="fg"><label>描述</label>'+exbtn('d2c1t','課程成果一')
+    +'<textarea class="tf" data-f="d2c1t" style="min-height:80px" placeholder="課程內容、學到的實務知識。">'+esc(fd.d2c1t)+'</textarea></div>'
+    +'<div class="fg"><label>課程成果二</label><input type="text" data-f="d2c2n" placeholder="例：高三小論文「AI 智慧製造」" value="'+esc(fd.d2c2n)+'"></div>'
+    +'<div class="fg"><label>描述</label>'+exbtn('d2c2t','課程成果二')
+    +'<textarea class="tf" data-f="d2c2t" style="min-height:80px" placeholder="主題、負責內容、學到的能力。">'+esc(fd.d2c2t)+'</textarea></div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>未來學習計畫</h2></div></div>'
+    +exbtn('d2plan','未來學習計畫')
+    +'<textarea class="tf" data-f="d2plan" style="min-height:150px" placeholder="① 語言能力提升計畫\n② 希望爭取的實習機會\n③ 想修習的專業方向">'+esc(fd.d2plan)+'</textarea></div>';},
+  function(){return'<div class="notice"><div class="ico">✨</div><div><h3>D2 最後一步！</h3><p>完成後可按「👁 預覽」，再按「📄 下載 PDF」</p><div class="tag">⚠️ 生成需 20–35 秒</div></div></div>'
+    +'<div class="card"><div class="ch"><div class="sb">D2</div><div><h2>學習歷程反思總結</h2></div></div>'
+    +exbtn('d2reflect','學習歷程反思')
+    +'<textarea class="tf" data-f="d2reflect" style="min-height:160px" placeholder="① 三年學習中最大的轉變\n② 確認了哪些未來方向\n③ 為什麼確信朝陽企管系是最佳選擇">'+esc(fd.d2reflect)+'</textarea></div>';},
+];
+
+var D3=[
+  function(){return'<div class="card"><div class="ch"><div class="sb">D3</div><div><h2>語言檢定證書</h2></div></div>'
+    +exbtn('d3lang','語言檢定')
+    +'<textarea class="tf" data-f="d3lang" style="min-height:110px" placeholder="例：全民英語檢定中級（通過）">'+esc(fd.d3lang)+'</textarea>'
+    +'<div class="fg" style="margin-top:10px"><label>證書照片</label>'+iz('d3langimg')+'</div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">D3</div><div><h2>競賽獲獎紀錄</h2></div></div>'
+    +exbtn('d3awards','競賽獲獎')
+    +'<textarea class="tf" data-f="d3awards" style="min-height:130px" placeholder="例：校內小論文比賽優等">'+esc(fd.d3awards)+'</textarea>'
+    +'<div class="fg" style="margin-top:10px"><label>獎狀或照片</label>'+iz('d3awardsimg')+'</div></div>';},
+  function(){return'<div class="card"><div class="ch"><div class="sb">D3</div><div><h2>專題成果與課堂報告</h2></div></div>'
+    +exbtn('d3projects','專題成果')
+    +'<textarea class="tf" data-f="d3projects" style="min-height:130px" placeholder="例：高三自主學習：探討台灣手搖飲品牌策略">'+esc(fd.d3projects)+'</textarea>'
+    +'<div class="fg" style="margin-top:10px"><label>成果照片</label>'+iz('d3projectsimg')+'</div></div>';},
+  function(){return'<div class="notice"><div class="ico">🏁</div><div><h3>D3 最後一步！</h3><p>完成後可按「👁 預覽」，再按「📄 下載 PDF」</p></div></div>'
+    +'<div class="card"><div class="ch"><div class="sb">D3</div><div><h2>其他有利審查資料</h2></div></div>'
+    +exbtn('d3other','其他資料')
+    +'<textarea class="tf" data-f="d3other" style="min-height:130px" placeholder="例：曾參觀朝陽科技大學校園開放日。">'+esc(fd.d3other)+'</textarea>'
+    +'<div class="fg" style="margin-top:10px"><label>相關照片</label>'+iz('d3otherimg')+'</div></div>';},
+];
+
+var DOCS=[D1,D2,D3];
+
+/* ════════════════════════════════════════════════════════
+   RENDER & EVENTS
+══════════════════════════════════════════════════════════ */
 function render(){
-  var forms=DOCS[doc];var s=step[doc];if(s>=forms.length)s=forms.length-1;
+  var forms=DOCS[doc]; var s=step[doc]; if(s>=forms.length)s=forms.length-1;
   document.getElementById('fc').innerHTML=forms[s]();
-  document.getElementById('si').textContent='步驟 '+(s+1)+' / '+TOTALS[doc];
+  document.getElementById('si').innerHTML='步驟 <b>'+(s+1)+'</b> / <b>'+TOTALS[doc]+'</b>';
   document.getElementById('fill').style.width=(((s+1)/TOTALS[doc])*100)+'%';
   document.getElementById('bprev').style.display=s===0?'none':'inline-block';
   document.getElementById('bnext').style.display=s===TOTALS[doc]-1?'none':'inline-block';
   document.getElementById('bdl').style.display=s===TOTALS[doc]-1?'inline-block':'none';
+  document.getElementById('tb-mark').textContent=['I','II','III'][doc];
   document.querySelectorAll('.tab').forEach(function(t){t.className='tab'+(parseInt(t.getAttribute('data-doc'))===doc?' on':'');});
 }
+
 document.getElementById('bnext').onclick=function(){if(step[doc]<TOTALS[doc]-1){step[doc]++;render();window.scrollTo(0,0);}};
 document.getElementById('bprev').onclick=function(){if(step[doc]>0){step[doc]--;render();window.scrollTo(0,0);}};
 document.querySelectorAll('.tab').forEach(function(t){t.onclick=function(){doc=parseInt(t.getAttribute('data-doc'));render();window.scrollTo(0,0);};});
-document.addEventListener('input',function(e){var f=e.target.getAttribute('data-f');if(f&&f in fd)fd[f]=e.target.value;});
-document.addEventListener('change',function(e){var k=e.target.getAttribute('data-for');if(!k)return;var file=e.target.files[0];if(!file)return;var r=new FileReader();r.onload=function(ev){fd[k]=ev.target.result;render();};r.readAsDataURL(file);});
-document.addEventListener('click',function(e){
-  var rm=e.target.getAttribute('data-rm');if(rm){e.stopPropagation();fd[rm]=null;render();return;}
-  var z=e.target.closest('[data-zone]');if(z&&!fd[z.getAttribute('data-zone')]){var fi=document.getElementById('f_'+z.getAttribute('data-zone'));if(fi)fi.click();return;}
-  var tr=e.target.closest('[data-trait]');if(tr){var t=TRAITS[parseInt(tr.getAttribute('data-trait'))];var idx=fd.d2traits.indexOf(t);if(idx>=0)fd.d2traits.splice(idx,1);else fd.d2traits.push(t);render();return;}
-  var ex=e.target.closest('[data-ex]');if(ex){openEx(ex.getAttribute('data-ex'));return;}
-  var tab=e.target.closest('[data-doc]');if(tab&&tab.classList.contains('tab')){doc=parseInt(tab.getAttribute('data-doc'));render();window.scrollTo(0,0);}
+
+// 文字輸入
+document.addEventListener('input',function(e){
+  var f=e.target.getAttribute('data-f');
+  if(f && f in fd) fd[f]=e.target.value;
 });
 
-var EX_LABELS={c2:'C-2 社團活動',c3:'C-3 幹部經驗',c4:'C-4 服務學習',c8:'C-8 特殊表現',d1conc:'多元表現結論',d2bio:'自傳',d2motive:'就讀動機',d2plan:'未來學習計畫',d2reflect:'學習歷程反思'};
+// 圖片上傳（多張）
+document.addEventListener('change',function(e){
+  var k=e.target.getAttribute('data-for'); if(!k) return;
+  var file=e.target.files[0]; if(!file) return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    if(!Array.isArray(fd[k])) fd[k]=[];
+    if(fd[k].length<2) fd[k].push(ev.target.result);
+    e.target.value='';
+    render();
+  };
+  r.readAsDataURL(file);
+});
+
+// 點擊事件
+document.addEventListener('click',function(e){
+  // 移除圖片
+  var rm=e.target.getAttribute('data-rm'); var rmi=e.target.getAttribute('data-rmi');
+  if(rm && rmi!==null && rmi!==undefined){e.stopPropagation(); fd[rm].splice(parseInt(rmi),1); render(); return;}
+  // 上傳區
+  var z=e.target.closest('[data-zone]');
+  if(z){var k=z.getAttribute('data-zone'); var fi=document.getElementById('f_'+k); if(fi)fi.click(); return;}
+  // 個人特質
+  var tr=e.target.closest('[data-trait]');
+  if(tr){var t=TRAITS[parseInt(tr.getAttribute('data-trait'))]; var idx=fd.d2traits.indexOf(t); if(idx>=0)fd.d2traits.splice(idx,1); else fd.d2traits.push(t); render(); return;}
+  // 範例按鈕
+  var ex=e.target.closest('[data-ex]');
+  if(ex){openEx(ex.getAttribute('data-ex')); return;}
+  // tab 切換
+  var tab=e.target.closest('[data-doc]');
+  if(tab && tab.classList.contains('tab')){doc=parseInt(tab.getAttribute('data-doc')); render(); window.scrollTo(0,0);}
+});
+
+/* ════════════════════════════════════════════════════════
+   範例 Modal
+══════════════════════════════════════════════════════════ */
 function openEx(key){
   currentExKey=key;
-  document.getElementById('ex-title').textContent='💡 '+(EX_LABELS[key]||key)+' 參考範例';
+  document.getElementById('ex-title').textContent='參考範例 — '+(EX_LABELS[key]||key);
   var exs=EX[key]||[];
-  if(!exs.length){alert('此欄位請直接填寫。');return;}
-  var html='<div class="ex-intro">共 '+exs.length+' 份 · 選一份最接近自己情況的填入，再改成自己的故事</div>';
-  exs.forEach(function(ex,i){html+='<div class="ex-item" data-pick="'+i+'"><span class="ex-num">範例 '+(i+1)+'</span><span class="ex-tag">'+ex.tag+'</span><div class="ex-text">'+esc(ex.text)+'</div></div>';});
-  html+='<div class="ex-hint">📝 填入後把細節換成自己的真實經歷</div>';
+  if(!exs.length){alert('此欄位請直接填寫。'); return;}
+  var html='<div class="ex-intro">共 '+exs.length+' 種寫法 · 選一種最接近你的填入，再依實際經歷改成自己的故事</div>';
+  exs.forEach(function(ex,i){
+    html+='<div class="ex-item" data-pick="'+i+'">'
+        +'<span class="ex-num">範例 '+(i+1)+'</span>'
+        +'<span class="ex-tag">'+ex.tag+'</span>'
+        +'<div class="ex-text">'+esc(ex.text)+'</div>'
+        +'</div>';
+  });
+  html+='<div class="ex-hint">📝 點選填入後，把範例中的具體細節換成你自己的真實經歷</div>';
   document.getElementById('ex-body').innerHTML=html;
   document.getElementById('exmodal').classList.add('show');
-  document.querySelectorAll('[data-pick]').forEach(function(el){el.onclick=function(){fd[currentExKey]=EX[currentExKey][parseInt(el.getAttribute('data-pick'))].text;render();document.getElementById('exmodal').classList.remove('show');};});
+  document.querySelectorAll('[data-pick]').forEach(function(el){
+    el.onclick=function(){
+      fd[currentExKey]=EX[currentExKey][parseInt(el.getAttribute('data-pick'))].text;
+      render();
+      document.getElementById('exmodal').classList.remove('show');
+    };
+  });
 }
 document.getElementById('exclosebtn').onclick=function(){document.getElementById('exmodal').classList.remove('show');};
+document.getElementById('exmodal').onclick=function(e){if(e.target.id==='exmodal')this.classList.remove('show');};
+
+/* ════════════════════════════════════════════════════════
+   PREVIEW
+══════════════════════════════════════════════════════════ */
 document.getElementById('bpreview').onclick=showPreview;
 document.getElementById('pvclosebtn').onclick=function(){document.getElementById('pvmodal').classList.remove('show');};
+
 function showPreview(){
-  var pages=doc===0?getD1Pages():doc===1?getD2Pages():getD3Pages();
-  var body=document.getElementById('pvbody');body.innerHTML='';
-  var vw=Math.min(window.innerWidth||390,window.screen?window.screen.width:9999);
-  var availW=Math.max(200,Math.min(vw-48,680));
-  var sc=Math.min(0.68,availW/794);
-  var pw=Math.floor(794*sc),ph=Math.floor(1123*sc);
+  var pages = doc===0?getD1Pages() : doc===1?getD2Pages() : getD3Pages();
+  var body=document.getElementById('pvbody'); body.innerHTML='';
+  var availW=Math.min(window.innerWidth-40,720);
+  var sc=Math.min(0.78, availW/794);
+  var pw=Math.floor(794*sc), ph=Math.floor(1123*sc);
   pages.forEach(function(p){
     var wrap=document.createElement('div');
-    wrap.style.cssText='display:flex;flex-direction:column;align-items:center;width:100%';
-    var lbl=document.createElement('div');lbl.className='pv-lbl';lbl.textContent='— '+p.l+' —';
-    var outer=document.createElement('div');
-    outer.style.width=pw+'px';outer.style.height=ph+'px';
-    outer.style.overflow='hidden';outer.style.position='relative';
-    outer.style.borderRadius='7px';outer.style.boxShadow='0 6px 30px rgba(0,0,0,.7)';
-    outer.style.flexShrink='0';
-    outer.style.webkitTransform='translateZ(0)';outer.style.transform='translateZ(0)';
-    outer.style.webkitMaskImage='-webkit-radial-gradient(white,black)';
-    var pg=document.createElement('div');
-    pg.style.width='794px';pg.style.height='1123px';
-    pg.style.position='absolute';pg.style.top='0';pg.style.left='0';
-    pg.style.webkitTransform='scale('+sc+')';pg.style.transform='scale('+sc+')';
-    pg.style.webkitTransformOrigin='top left';pg.style.transformOrigin='top left';
-    pg.innerHTML=p.h;
-    outer.appendChild(pg);wrap.appendChild(lbl);wrap.appendChild(outer);body.appendChild(wrap);
+    var lbl=document.createElement('div'); lbl.className='pv-lbl'; lbl.textContent='— '+p.l+' —';
+    var outer=document.createElement('div'); outer.className='pv-outer';
+    outer.style.cssText='width:'+pw+'px;height:'+ph+'px;overflow:hidden;';
+    var pg=document.createElement('div'); pg.style.cssText='width:794px;transform:scale('+sc+');transform-origin:top left;';
+    pg.innerHTML=p.h; outer.appendChild(pg);
+    wrap.appendChild(lbl); wrap.appendChild(outer); body.appendChild(wrap);
   });
   document.getElementById('pvmodal').classList.add('show');
 }
+
+/* ════════════════════════════════════════════════════════
+   PDF GENERATION
+══════════════════════════════════════════════════════════ */
 document.getElementById('bdl').onclick=function(){genPDF();};
+
 async function genPDF(){
-  var btn=document.getElementById('bdl');btn.disabled=true;
-  var lo=document.getElementById('lo');var lst=document.getElementById('lst');lo.classList.add('show');
-  var isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  // iOS：必須在 async 之前同步開視窗，否則被 popup 攔截器封鎖
-  var mobileWin=null;
-  if(isMobile){mobileWin=window.open('about:blank','_blank');if(mobileWin)mobileWin.document.write('<html><body style="font-family:sans-serif;padding:30px;text-align:center"><p style="font-size:18px">⏳ PDF 生成中，請稍候...</p></body></html>');}
+  var btn=document.getElementById('bdl'); btn.disabled=true;
+  var lo=document.getElementById('lo'); var lst=document.getElementById('lst'); lo.classList.add('show');
   try{
-    if(!window.jspdf||!window.html2canvas)throw new Error('PDF工具未載入，請重整頁面');
-    var pages=doc===0?getD1Pages():doc===1?getD2Pages():getD3Pages();
+    if(!window.jspdf || !window.html2canvas) throw new Error('PDF 工具未載入，請重整頁面');
+    var pages = doc===0?getD1Pages() : doc===1?getD2Pages() : getD3Pages();
     var pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     for(var i=0;i<pages.length;i++){
-      lst.textContent='生成 '+pages[i].l+'...';if(i>0)pdf.addPage();
-      var cv=await cap(pages[i].h);wm(cv);
+      lst.textContent='生成 '+pages[i].l+'... ('+(i+1)+'/'+pages.length+')';
+      if(i>0)pdf.addPage();
+      var cv=await cap(pages[i].h);
+      addWatermark(cv);
       pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',0,0,210,297);
     }
-    lst.textContent='儲存中...';await new Promise(function(r){setTimeout(r,200);});
-    var fname=(fd.name||'申請人')+'_朝陽企管_'+['D1_多元表現','D2_學習歷程','D3_有利資料'][doc]+'.pdf';
-    if(isMobile&&mobileWin){
-      // iOS：用 data URI 在預先開好的視窗顯示 PDF，可從 Safari 分享
-      var dataUri=pdf.output('datauristring');
-      mobileWin.location.href=dataUri;
-    }else{
-      if(mobileWin)mobileWin.close();
-      pdf.save(fname);
-    }
-  }catch(err){if(mobileWin)mobileWin.close();alert('錯誤：'+err.message);}
-  finally{lo.classList.remove('show');btn.disabled=false;}
+    lst.textContent='儲存中...';
+    await new Promise(function(r){setTimeout(r,200);});
+    pdf.save((fd.name||'申請人')+'_朝陽企管_'+['D1_多元表現','D2_學習歷程','D3_有利資料'][doc]+'.pdf');
+  }catch(err){alert('錯誤：'+err.message);}
+  finally{lo.classList.remove('show'); btn.disabled=false;}
 }
-
-function getD1Pages(){return[{l:'D1封面',h:pCover('D1','多元表現總整心得')},{l:'C-2 + C-3',h:pDual('C-2','社團活動',fd.c2,fd.c2img,'C-3','幹部經驗',fd.c3,fd.c3img,2,4)},{l:'C-4 + C-8',h:pDual('C-4','服務學習',fd.c4,fd.c4img,'C-8','特殊優良表現',fd.c8,fd.c8img,3,4)},{l:'結論',h:pConc('D1','多元表現總整心得',fd.d1conc,4,4)}];}
-function getD2Pages(){return[{l:'D2封面',h:pCover('D2','學習歷程自述')},{l:'個人簡歷',h:pBio()},{l:'自傳',h:pSec('D2','自傳',fd.d2bio,null,3,8)},{l:'就讀動機',h:pSec('D2','就讀動機',fd.d2motive,null,4,8)},{l:'學習成績',h:pGrades()},{l:'課程成果',h:pCourses()},{l:'未來計畫',h:pSec('D2','未來學習計畫',fd.d2plan,null,7,8)},{l:'學習反思',h:pConc('D2','學習歷程自述',fd.d2reflect,8,8)}];}
-function getD3Pages(){return[{l:'D3封面',h:pCover('D3','其他有利審查資料')},{l:'語言+競賽',h:pDual('D3','語言檢定證書',fd.d3lang,fd.d3langimg,'D3','競賽獲獎紀錄',fd.d3awards,fd.d3awardsimg,2,3)},{l:'專題+其他',h:pDual('D3','專題成果',fd.d3projects,fd.d3projectsimg,'D3','其他有利資料',fd.d3other,fd.d3otherimg,3,3)}];}
 
 async function cap(html){
   var d=document.createElement('div');
   d.style.cssText='position:fixed;left:-9999px;top:0;width:794px;height:1123px;overflow:hidden;background:white;z-index:-1';
   d.innerHTML=html;
   document.body.appendChild(d);
-  // JavaScript 直接設定每個元素 letterSpacing=0（比 CSS 注入更可靠）
-  var els=d.querySelectorAll('*');
-  for(var i=0;i<els.length;i++){
-    els[i].style.letterSpacing='0px';
-    els[i].style.wordSpacing='0px';
-  }
-  var imgs=d.querySelectorAll('img');
-  await Promise.all(Array.from(imgs).map(function(img){return img.complete?Promise.resolve():new Promise(function(r){img.onload=r;img.onerror=r;});}));
-  await new Promise(function(r){setTimeout(r,300);});
-  var cv=await html2canvas(d,{
-    width:794,height:1123,
-    scale:2,
-    useCORS:true,allowTaint:true,
-    backgroundColor:'#fff',
-    logging:false,
-    windowWidth:794,windowHeight:1123,
-    scrollX:0,scrollY:0
-  });
-  document.body.removeChild(d);return cv;
+  await new Promise(function(r){setTimeout(r,180);});
+  var cv=await html2canvas(d,{width:794,height:1123,scale:1.5,useCORS:true,allowTaint:true,backgroundColor:'#fff',logging:false});
+  document.body.removeChild(d);
+  return cv;
 }
-function wm(cv){var ctx=cv.getContext('2d');ctx.save();ctx.globalAlpha=0.065;ctx.fillStyle='#0B2F5E';var fs=Math.floor(cv.width*0.048);ctx.font='bold '+fs+'px \'Microsoft JhengHei\',sans-serif';var tw=ctx.measureText('朝陽科大企管系').width,gX=tw+60,gY=fs+90;for(var r=-3;r<14;r++)for(var c=-2;c<9;c++){ctx.save();ctx.translate(c*gX+cv.width*.05,r*gY+cv.height*.03);ctx.rotate(-Math.PI/5.5);ctx.fillText('朝陽科大企管系',0,0);ctx.restore();}ctx.restore();}
 
-function pCover(dcode,dtitle){var dot='radial-gradient(circle,rgba(201,164,74,.1) 1.5px,transparent 1.5px)';return'<div style="width:794px;height:1123px;background:linear-gradient(155deg,#081e3f 0%,#0d3569 55%,#0a2a58 100%);position:relative;overflow:hidden;font-family:\'Microsoft JhengHei\',\'Noto Sans TC\',sans-serif;color:white"><div style="position:absolute;inset:0;background-image:'+dot+';background-size:32px 32px;opacity:.7"></div><div style="position:absolute;top:-130px;right:-130px;width:500px;height:500px;border-radius:50%;border:1.5px solid rgba(201,164,74,.18)"></div><div style="position:absolute;top:-80px;right:-80px;width:360px;height:360px;border-radius:50%;border:1px solid rgba(201,164,74,.13)"></div><div style="position:absolute;top:-30px;right:-30px;width:220px;height:220px;border-radius:50%;border:1.5px solid rgba(201,164,74,.25)"></div><div style="position:absolute;bottom:-80px;left:-80px;width:280px;height:280px;border-radius:50%;border:1px solid rgba(255,255,255,.07)"></div><div style="position:absolute;top:24px;left:24px;width:36px;height:36px;border-top:2px solid rgba(201,164,74,.55);border-left:2px solid rgba(201,164,74,.55)"></div><div style="position:absolute;top:24px;right:24px;width:36px;height:36px;border-top:2px solid rgba(201,164,74,.55);border-right:2px solid rgba(201,164,74,.55)"></div><div style="position:absolute;bottom:24px;left:24px;width:36px;height:36px;border-bottom:2px solid rgba(201,164,74,.55);border-left:2px solid rgba(201,164,74,.55)"></div><div style="position:absolute;bottom:24px;right:24px;width:36px;height:36px;border-bottom:2px solid rgba(201,164,74,.55);border-right:2px solid rgba(201,164,74,.55)"></div><div style="position:absolute;top:68px;left:24px;right:24px;height:1px;background:rgba(201,164,74,.15)"></div><div style="position:absolute;bottom:68px;left:24px;right:24px;height:1px;background:rgba(255,255,255,.08)"></div><div style="position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,transparent,#C9A44A,#e8c566,#C9A44A,transparent)"></div><div style="position:absolute;bottom:0;left:0;right:0;height:5px;background:linear-gradient(90deg,transparent,#C9A44A,#e8c566,#C9A44A,transparent)"></div><div style="position:absolute;top:22px;right:22px;background:rgba(201,164,74,.18);border:1px solid rgba(201,164,74,.5);color:#C9A44A;padding:5px 13px;border-radius:14px;font-size:13px;font-weight:700;letter-spacing:2px;z-index:2">'+dcode+'</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:0 70px"><div style="width:72px;height:72px;border:2px solid #C9A44A;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;background:rgba(201,164,74,.08);position:relative"><div style="position:absolute;width:2px;height:36px;background:#C9A44A;left:35px;top:18px"></div><div style="position:absolute;height:2px;width:36px;background:#C9A44A;top:35px;left:18px"></div><div style="position:absolute;width:10px;height:10px;border-radius:50%;background:#C9A44A;top:31px;left:31px"></div></div><div style="font-size:12px;letter-spacing:5px;color:rgba(255,255,255,.45);margin-bottom:7px">CHAOYANG UNIVERSITY OF TECHNOLOGY</div><h1 style="font-size:42px;font-weight:900;letter-spacing:5px;margin-bottom:6px">朝陽科技大學</h1><h2 style="font-size:26px;font-weight:700;color:#C9A44A;letter-spacing:4px;margin-bottom:30px">企業管理系</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center"><div style="width:56px;height:1px;background:#C9A44A"></div><div style="width:6px;height:6px;border-radius:50%;background:#C9A44A"></div><div style="width:56px;height:1px;background:#C9A44A"></div></div><div style="font-size:12px;letter-spacing:4px;color:rgba(255,255,255,.38);margin-bottom:9px">APPLICATION DOCUMENT</div><h3 style="font-size:30px;font-weight:800;letter-spacing:3px;margin-bottom:48px">'+dtitle+'</h3><div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:22px 40px;display:inline-block;min-width:310px"><div style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.38);margin-bottom:14px">申請人資訊</div><div style="display:flex;flex-direction:column;gap:9px"><div style="display:flex;gap:14px;font-size:14px"><span style="color:rgba(255,255,255,.55);min-width:68px">畢業學校</span><span style="font-weight:600">'+(fd.school||'_______________')+'</span></div><div style="display:flex;gap:14px;font-size:14px"><span style="color:rgba(255,255,255,.55);min-width:68px">畢業科系</span><span style="font-weight:600">'+(fd.dept||'_______________')+'</span></div><div style="display:flex;gap:14px;font-size:14px"><span style="color:rgba(255,255,255,.55);min-width:68px">申請人</span><span style="font-weight:900;font-size:17px;color:#C9A44A">'+(fd.name||'_______________')+'</span></div></div></div></div><div style="position:absolute;bottom:18px;font-size:10px;color:rgba(255,255,255,.28);letter-spacing:1px;z-index:2;left:0;right:0;text-align:center">朝陽科技大學企業管理系 Department of Business Administration</div></div>';}
-function pDual(cA,tA,conA,imgA,cB,tB,conB,imgB,pg,total){function half(code,title,content,img){var lines=(content||'（未填寫）').split('\n');var html=lines.map(function(l){if(!l.trim())return'<div style="height:5px"></div>';var isH=l.trim().length<=25&&!/[。，、）]$/.test(l.trim());return isH?'<div style="font-size:14.5px;font-weight:800;color:#0B2F5E;margin:10px 0 4px;padding-left:9px;border-left:3px solid #C9A44A">'+l+'</div>':'<div style="font-size:13.5px;line-height:1.85;color:#1e2d42;margin:2px 0">'+l+'</div>';}).join('');var tw=img?'57%':'100%';return'<div style="padding:16px 26px 0"><div style="display:flex;align-items:center;gap:9px;margin-bottom:10px"><div style="background:#C9A44A;color:#0B2F5E;width:34px;height:34px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;text-align:center;line-height:1.2;flex-shrink:0">'+code+'</div><div style="font-size:16px;font-weight:900;color:#0B2F5E">'+title+'</div></div><div style="display:flex;gap:14px;overflow:hidden"><div style="width:'+tw+';overflow:hidden">'+html+'</div>'+(img?'<div style="width:40%;flex-shrink:0"><img src="'+img+'" style="width:100%;max-height:210px;object-fit:cover;border-radius:7px;border:2px solid #e8edf2"></div>':'')+'</div></div>';}return'<div style="width:794px;height:1123px;background:white;position:relative;overflow:hidden;font-family:\'Microsoft JhengHei\',\'Noto Sans TC\',sans-serif"><div style="background:#0B2F5E;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 26px"><div style="font-size:12px;font-weight:700;color:#C9A44A;letter-spacing:1px">朝陽科技大學 企業管理系</div><div style="font-size:10px;color:rgba(255,255,255,.45)">'+pg+' / '+total+'</div></div><div style="height:3px;background:linear-gradient(90deg,#C9A44A,#e8c566,#C9A44A)"></div>'+half(cA,tA,conA,imgA)+'<div style="margin:14px 26px;border-top:1.5px dashed #e0e8f0;position:relative"><div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:white;padding:0 10px;font-size:10px;color:#9aa5b4">▼</div></div>'+half(cB,tB,conB,imgB)+'<div style="position:absolute;bottom:0;left:0;right:0;height:44px;background:#f4f7fa;border-top:1px solid #e0e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 26px"><span style="font-size:9px;color:#8a9ab0">朝陽科技大學 企業管理系</span><span style="font-size:9px;color:#8a9ab0">'+pg+' / '+total+'</span></div></div>';}
-function pSec(code,title,content,img,pg,total){var lines=(content||'（未填寫）').split('\n');var html=lines.map(function(l){if(!l.trim())return'<div style="height:7px"></div>';var h=l.trim().length<=25&&!/[。，、）]$/.test(l.trim());return h?'<div style="font-size:15px;font-weight:800;color:#0B2F5E;margin:14px 0 5px;padding-left:9px;border-left:3px solid #C9A44A">'+l+'</div>':'<div style="font-size:14px;line-height:1.9;color:#1e2d42;margin:3px 0">'+l+'</div>';}).join('');var tw=img?'54%':'100%';return'<div style="width:794px;height:1123px;background:white;position:relative;overflow:hidden;font-family:\'Microsoft JhengHei\',\'Noto Sans TC\',sans-serif"><div style="background:#0B2F5E;padding:0 26px;height:62px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div style="background:#C9A44A;color:#0B2F5E;width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;text-align:center;line-height:1.2">'+code+'</div><div><div style="font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:1px">SECTION</div><div style="font-size:18px;font-weight:900;color:white">'+title+'</div></div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4)">朝陽科技大學</div><div style="font-size:11px;font-weight:700;color:#C9A44A">企業管理系</div></div></div><div style="height:3px;background:linear-gradient(90deg,#C9A44A,#e8c566,#C9A44A)"></div><div style="padding:22px 26px;display:flex;gap:16px;height:'+(1123-62-3-44)+'px;overflow:hidden"><div style="width:'+tw+';overflow:hidden">'+html+'</div>'+(img?'<div style="width:43%;flex-shrink:0"><img src="'+img+'" style="width:100%;max-height:290px;object-fit:cover;border-radius:7px;border:2px solid #e8edf2"></div>':'')+'</div><div style="position:absolute;bottom:0;left:0;right:0;height:44px;background:#f4f7fa;border-top:1px solid #e0e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 26px"><span style="font-size:9px;color:#8a9ab0">朝陽科技大學 企業管理系</span><span style="font-size:9px;color:#8a9ab0">'+pg+' / '+total+'</span></div></div>';}
-function pConc(dcode,dtitle,content,pg,total){var lines=(content||'（未填寫）').split('\n');var html=lines.map(function(l){return l.trim()?'<div style="font-size:14px;line-height:1.95;color:#1e2d42;margin:4px 0">'+l+'</div>':'<div style="height:9px"></div>';}).join('');return'<div style="width:794px;height:1123px;background:white;position:relative;overflow:hidden;font-family:\'Microsoft JhengHei\',\'Noto Sans TC\',sans-serif"><div style="background:linear-gradient(135deg,#0B2F5E,#1a4a8a);padding:0 26px;height:62px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div style="background:linear-gradient(135deg,#C9A44A,#e8c566);color:#0B2F5E;width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;text-align:center;line-height:1.2">結<br>論</div><div><div style="font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.4)">CONCLUSION</div><div style="font-size:18px;font-weight:900;color:white">'+dtitle+'</div></div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4)">朝陽科技大學</div><div style="font-size:11px;font-weight:700;color:#C9A44A">企業管理系</div></div></div><div style="height:3px;background:linear-gradient(90deg,#C9A44A,#e8c566,#C9A44A)"></div><div style="background:#f8fafc;border-bottom:1px solid #e8edf2;padding:9px 26px;display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;border-radius:50%;background:#0B2F5E;display:flex;align-items:center;justify-content:center;color:#C9A44A;font-size:12px;font-weight:900;flex-shrink:0">'+(fd.name||'？')[0]+'</div><div><div style="font-size:12px;font-weight:800;color:#0B2F5E">'+(fd.name||'申請人')+'</div><div style="font-size:10px;color:#8a9ab0">'+(fd.school||'')+' '+(fd.dept||'')+'</div></div></div><div style="padding:26px 26px;overflow:hidden">'+html+'</div><div style="position:absolute;bottom:0;left:0;right:0;height:44px;background:#f4f7fa;border-top:1px solid #e0e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 26px"><span style="font-size:9px;color:#8a9ab0">朝陽科技大學 企業管理系</span><span style="font-size:9px;color:#8a9ab0">'+pg+' / '+total+'</span></div></div>';}
-function pBio(){return'<div style="width:794px;height:1123px;background:white;position:relative;overflow:hidden;font-family:\'Microsoft JhengHei\',\'Noto Sans TC\',sans-serif"><div style="background:#0B2F5E;padding:0 26px;height:62px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div style="background:#C9A44A;color:#0B2F5E;width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900">D2</div><div><div style="font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.4)">SECTION</div><div style="font-size:18px;font-weight:900;color:white">個人簡歷</div></div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4)">朝陽科技大學</div><div style="font-size:11px;font-weight:700;color:#C9A44A">企業管理系</div></div></div><div style="height:3px;background:linear-gradient(90deg,#C9A44A,#e8c566,#C9A44A)"></div><div style="padding:18px 26px;display:grid;grid-template-columns:1fr 1fr;gap:20px;height:'+(1123-62-3-44)+'px;overflow:hidden"><div><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:800;color:#C9A44A;background:#0B2F5E;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:6px">基本資訊</div><div style="font-size:13px;color:#1e2d42;line-height:1.8"><b>姓名：</b>'+(fd.name||'—')+'<br><b>學校：</b>'+(fd.school||'—')+'<br><b>科別：</b>'+(fd.dept||'—')+'</div></div><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:800;color:#C9A44A;background:#0B2F5E;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:6px">幹部經歷</div>'+(fd.d2roles?fd.d2roles.split('\n').map(function(l){return l.trim()?'<div style="font-size:12.5px;color:#1e2d42;padding:2px 0;border-bottom:1px solid #f0f4fa">'+l+'</div>':''}).join(''):'<div style="font-size:12px;color:#aaa">—</div>')+'</div><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:800;color:#C9A44A;background:#0B2F5E;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:6px">活動參與</div>'+(fd.d2activities?fd.d2activities.split('\n').map(function(l){return l.trim()?'<div style="font-size:12.5px;color:#1e2d42;padding:2px 0;border-bottom:1px solid #f0f4fa">'+l+'</div>':''}).join(''):'<div style="font-size:12px;color:#aaa">—</div>')+'</div><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:800;color:#C9A44A;background:#0B2F5E;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:6px">競賽表現</div>'+(fd.d2competitions?fd.d2competitions.split('\n').map(function(l){return l.trim()?'<div style="font-size:12.5px;color:#1e2d42;padding:2px 0;border-bottom:1px solid #f0f4fa">'+l+'</div>':''}).join(''):'<div style="font-size:12px;color:#aaa">—</div>')+'</div></div><div><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:800;color:#C9A44A;background:#0B2F5E;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:6px">個人特質</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:2px">'+fd.d2traits.map(function(t){return'<span style="background:#eef4ff;color:#0B2F5E;border-radius:12px;padding:3px 10px;font-size:11.5px;font-weight:700">'+t+'</span>';}).join('')+'</div></div><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:800;color:#C9A44A;background:#0B2F5E;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:6px">聯絡方式</div><div style="font-size:12.5px;color:#1e2d42;line-height:1.8"><b>電話：</b>'+(fd.d2phone||'—')+'<br><b>Email：</b>'+(fd.d2email||'—')+'</div></div></div></div><div style="position:absolute;bottom:0;left:0;right:0;height:44px;background:#f4f7fa;border-top:1px solid #e0e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 26px"><span style="font-size:9px;color:#8a9ab0">朝陽科技大學 企業管理系</span><span style="font-size:9px;color:#8a9ab0">2 / 8</span></div></div>';}
-function pGrades(){function gb(n,t){var lines=(t||'（未填寫）').split('\n');var h=lines.map(function(l){return l.trim()?'<div style="font-size:13px;line-height:1.85;color:#1e2d42">'+l+'</div>':'';}).join('');return'<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f0f4fa"><div style="font-size:14px;font-weight:800;color:#0B2F5E;margin-bottom:5px;padding-left:8px;border-left:3px solid #C9A44A">'+(n||'科目名稱')+'</div>'+h+'</div>';}return'<div style="width:794px;height:1123px;background:white;position:relative;overflow:hidden;font-family:\'Microsoft JhengHei\',\'Noto Sans TC\',sans-serif"><div style="background:#0B2F5E;padding:0 26px;height:62px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div style="background:#C9A44A;color:#0B2F5E;width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900">D2</div><div><div style="font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.4)">SECTION</div><div style="font-size:18px;font-weight:900;color:white">學習歷程反思—成績</div></div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4)">朝陽科技大學</div><div style="font-size:11px;font-weight:700;color:#C9A44A">企業管理系</div></div></div><div style="height:3px;background:linear-gradient(90deg,#C9A44A,#e8c566,#C9A44A)"></div><div style="padding:18px 26px;overflow:hidden;height:'+(1123-62-3-44)+'px">'+gb(fd.d2g1n,fd.d2g1t)+gb(fd.d2g2n,fd.d2g2t)+gb(fd.d2g3n,fd.d2g3t)+'</div><div style="position:absolute;bottom:0;left:0;right:0;height:44px;background:#f4f7fa;border-top:1px solid #e0e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 26px"><span style="font-size:9px;color:#8a9ab0">朝陽科技大學 企業管理系</span><span style="font-size:9px;color:#8a9ab0">5 / 8</span></div></div>';}
-function pCourses(){function cb(n,t){var lines=(t||'（未填寫）').split('\n');var h=lines.map(function(l){return l.trim()?'<div style="font-size:14px;line-height:1.85;color:#1e2d42">'+l+'</div>':'';}).join('');return'<div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #f0f4fa"><div style="font-size:15px;font-weight:800;color:#0B2F5E;margin-bottom:5px;padding-left:8px;border-left:3px solid #C9A44A">'+(n||'課程名稱')+'</div>'+h+'</div>';}return'<div style="width:794px;height:1123px;background:white;position:relative;overflow:hidden;font-family:\'Microsoft JhengHei\',\'Noto Sans TC\',sans-serif"><div style="background:#0B2F5E;padding:0 26px;height:62px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div style="background:#C9A44A;color:#0B2F5E;width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900">D2</div><div><div style="font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.4)">SECTION</div><div style="font-size:18px;font-weight:900;color:white">課程學習成果</div></div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4)">朝陽科技大學</div><div style="font-size:11px;font-weight:700;color:#C9A44A">企業管理系</div></div></div><div style="height:3px;background:linear-gradient(90deg,#C9A44A,#e8c566,#C9A44A)"></div><div style="padding:18px 26px;overflow:hidden;height:'+(1123-62-3-44)+'px">'+cb(fd.d2c1n,fd.d2c1t)+cb(fd.d2c2n,fd.d2c2t)+'</div><div style="position:absolute;bottom:0;left:0;right:0;height:44px;background:#f4f7fa;border-top:1px solid #e0e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 26px"><span style="font-size:9px;color:#8a9ab0">朝陽科技大學 企業管理系</span><span style="font-size:9px;color:#8a9ab0">6 / 8</span></div></div>';}
+// ════════════════════════════════════════════════════════
+//   PDF — 典藏編輯風 (Refined Editorial / Archive)
+// ════════════════════════════════════════════════════════
 
+// 浮水印：朝陽企管，襯線斜向重複
+function addWatermark(cv){
+  var ctx=cv.getContext('2d');
+  ctx.save();
+  ctx.globalAlpha=0.045;
+  ctx.fillStyle='#1E2A4A';
+  var fs=Math.floor(cv.width*0.052);
+  ctx.font='600 '+fs+'px "Noto Serif TC","Microsoft JhengHei",serif';
+  var txt='朝陽企管';
+  var tw=ctx.measureText(txt).width, gX=tw+90, gY=fs+105;
+  for(var r=-3;r<14;r++){
+    for(var c=-2;c<10;c++){
+      ctx.save();
+      ctx.translate(c*gX+cv.width*.04, r*gY+cv.height*.03);
+      ctx.rotate(-Math.PI/5.5);
+      ctx.fillText(txt,0,0);
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+
+// 字型常數
+var PAGE_SERIF='\'Noto Serif TC\',\'Microsoft JhengHei\',serif';
+var PAGE_SANS='\'Noto Sans TC\',\'Microsoft JhengHei\',sans-serif';
+var PAGE_DISPLAY='\'Cormorant Garamond\',\'Noto Serif TC\',serif';
+
+// 顏色常數
+var C_INK='#1A1612', C_INK_SOFT='#5A554E', C_INK_LIGHT='#8A847C';
+var C_NAVY='#1E2A4A', C_BRASS='#A8853A', C_BRASS_LIGHT='#C9A44A', C_BRASS_DEEP='#8B6E2D';
+var C_PAPER='#FFFFFF', C_CREAM='#FAF6ED', C_CREAM_DEEP='#F5EFE0';
+var C_LINE='#E5DDC9', C_LINE_STRONG='#C9C0AE';
+
+// Roman numerals helper for D1/D2/D3
+function romanFor(code){
+  if(code==='D1') return 'D · I';
+  if(code==='D2') return 'D · II';
+  if(code==='D3') return 'D · III';
+  return code;
+}
+
+// 圖片區塊（最多 2 張，contain 不切圖）
+function imgBlock(imgs, opts){
+  imgs = imgs || [];
+  if(imgs.length===0) return '';
+  opts = opts||{};
+  var width = opts.width || '40%';
+  var maxH1 = opts.maxH1 || 300;
+  var maxH2 = opts.maxH2 || 200;
+  var label = opts.label || '佐證影像';
+  var frame = 'background:'+C_CREAM_DEEP+';border:1px solid '+C_LINE_STRONG+';padding:6px;display:flex;align-items:center;justify-content:center';
+  var imgStyle = 'max-width:100%;max-height:100%;object-fit:contain;display:block';
+  if(imgs.length===1){
+    return '<div style="width:'+width+';flex-shrink:0">'
+         + '<div style="'+frame+';height:'+maxH1+'px"><img src="'+imgs[0]+'" style="'+imgStyle+'"></div>'
+         + '<div style="font-size:8.5px;color:'+C_INK_LIGHT+';text-align:center;margin-top:7px;letter-spacing:3px;font-family:'+PAGE_DISPLAY+';font-style:italic;text-transform:uppercase">— '+label+' —</div>'
+         + '</div>';
+  }
+  return '<div style="width:'+width+';flex-shrink:0;display:flex;flex-direction:column;gap:8px">'
+       + '<div style="'+frame+';height:'+maxH2+'px"><img src="'+imgs[0]+'" style="'+imgStyle+'"></div>'
+       + '<div style="'+frame+';height:'+maxH2+'px"><img src="'+imgs[1]+'" style="'+imgStyle+'"></div>'
+       + '<div style="font-size:8.5px;color:'+C_INK_LIGHT+';text-align:center;letter-spacing:3px;font-family:'+PAGE_DISPLAY+';font-style:italic;text-transform:uppercase">— '+label+' —</div>'
+       + '</div>';
+}
+
+// 內文段落（自動辨識小標）
+function renderLines(content, opts){
+  opts=opts||{};
+  var fs=opts.fs||13.5, lh=opts.lh||1.95, hfs=opts.hfs||14.5;
+  var lines=(content||'（未填寫）').split('\n');
+  return lines.map(function(l){
+    if(!l.trim()) return '<div style="height:9px"></div>';
+    var isH = l.trim().length<=25 && !/[。，、）！？]$/.test(l.trim());
+    return isH
+      ? '<div style="font-size:'+hfs+'px;font-weight:700;color:'+C_NAVY+';margin:14px 0 6px;padding-left:11px;border-left:2px solid '+C_BRASS+';font-family:'+PAGE_SERIF+';letter-spacing:.5px">'+esc(l)+'</div>'
+      : '<div style="font-size:'+fs+'px;line-height:'+lh+';color:'+C_INK+';margin:3px 0;font-family:'+PAGE_SANS+';text-align:justify">'+esc(l)+'</div>';
+  }).join('');
+}
+
+// ── 頁首：典藏編輯風（淺色、典雅、細線）
+function pageHeader(code, title, typeLabel){
+  typeLabel = typeLabel || 'SECTION';
+  return '<div style="padding:32px 48px 0;position:relative">'
+       // 頂部：左識別、右頁碼將由 footer 處理
+       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+       + '<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:10.5px;color:'+C_BRASS_DEEP+';letter-spacing:3px;text-transform:uppercase">'+typeLabel+' &nbsp;·&nbsp; '+code+'</div>'
+       + '<div style="font-family:'+PAGE_DISPLAY+';font-size:10px;color:'+C_INK_LIGHT+';letter-spacing:2.5px;text-transform:uppercase">朝陽 · BIZ ADMIN</div>'
+       + '</div>'
+       // 標題
+       + '<h1 style="font-size:30px;font-weight:700;color:'+C_INK+';letter-spacing:3px;font-family:'+PAGE_SERIF+';margin-bottom:14px;line-height:1.2">'+title+'</h1>'
+       // 細金線分隔
+       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:0">'
+       + '<div style="width:60px;height:1px;background:'+C_BRASS+'"></div>'
+       + '<div style="width:5px;height:5px;background:'+C_BRASS+';transform:rotate(45deg)"></div>'
+       + '<div style="flex:1;height:1px;background:'+C_LINE_STRONG+'"></div>'
+       + '</div>'
+       + '</div>';
+}
+
+// ── 頁尾：簡約優雅
+function pageFooter(pg, total){
+  return '<div style="position:absolute;bottom:0;left:0;right:0;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid '+C_LINE+'">'
+       + '<span style="font-size:9.5px;color:'+C_INK_SOFT+';letter-spacing:2.5px;font-family:'+PAGE_DISPLAY+';font-style:italic;text-transform:uppercase">朝陽科技大學 · 企業管理系</span>'
+       + '<span style="font-family:'+PAGE_DISPLAY+';font-size:11px;color:'+C_BRASS_DEEP+';letter-spacing:1.5px"><span style="font-style:italic">'+pg+'</span> &nbsp;/&nbsp; <span>'+total+'</span></span>'
+       + '</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+//   pCover — 封面：典藏書本式排版
+// ─────────────────────────────────────────────────────────
+function pCover(dcode, dtitle){
+  var subtitleEN = dcode==='D1' ? 'Reflection on Diverse Experiences'
+                 : dcode==='D2' ? 'Personal Learning Journey'
+                 : 'Supporting Documents for Review';
+  return '<div style="width:794px;height:1123px;background:'+C_CREAM+';position:relative;overflow:hidden;font-family:'+PAGE_SERIF+';color:'+C_INK+'">'
+    // 紙張紋理感（極淡的網點）
+    +'<div style="position:absolute;inset:0;background-image:radial-gradient(circle at 10% 10%,rgba(168,133,58,.04) 0%,transparent 35%),radial-gradient(circle at 90% 90%,rgba(30,42,74,.03) 0%,transparent 35%);pointer-events:none"></div>'
+
+    // 上下細金線
+    +'<div style="position:absolute;top:0;left:0;right:0;height:5px;background:'+C_BRASS+'"></div>'
+    +'<div style="position:absolute;top:7px;left:0;right:0;height:1px;background:'+C_BRASS_LIGHT+';opacity:.6"></div>'
+    +'<div style="position:absolute;bottom:0;left:0;right:0;height:5px;background:'+C_BRASS+'"></div>'
+    +'<div style="position:absolute;bottom:7px;left:0;right:0;height:1px;background:'+C_BRASS_LIGHT+';opacity:.6"></div>'
+
+    // 四角細裝飾線
+    +'<div style="position:absolute;top:36px;left:36px;width:42px;height:42px;border-top:1px solid '+C_BRASS+';border-left:1px solid '+C_BRASS+'"></div>'
+    +'<div style="position:absolute;top:36px;right:36px;width:42px;height:42px;border-top:1px solid '+C_BRASS+';border-right:1px solid '+C_BRASS+'"></div>'
+    +'<div style="position:absolute;bottom:36px;left:36px;width:42px;height:42px;border-bottom:1px solid '+C_BRASS+';border-left:1px solid '+C_BRASS+'"></div>'
+    +'<div style="position:absolute;bottom:36px;right:36px;width:42px;height:42px;border-bottom:1px solid '+C_BRASS+';border-right:1px solid '+C_BRASS+'"></div>'
+
+    // 頂部小識別
+    +'<div style="position:absolute;top:60px;left:0;right:0;text-align:center">'
+    +'<div style="font-family:'+PAGE_DISPLAY+';font-size:11px;color:'+C_INK_LIGHT+';letter-spacing:5px;text-transform:uppercase;font-weight:500">Chaoyang University of Technology</div>'
+    +'<div style="margin:8px auto 0;width:32px;height:1px;background:'+C_BRASS+'"></div>'
+    +'</div>'
+
+    // 主中央區塊
+    +'<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 80px;text-align:center">'
+
+    // 校名
+    +'<div style="margin-bottom:46px">'
+    +'<h1 style="font-size:36px;font-weight:700;color:'+C_NAVY+';letter-spacing:8px;font-family:'+PAGE_SERIF+';margin-bottom:8px">朝 陽 科 技 大 學</h1>'
+    +'<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px">'
+    +'<div style="width:48px;height:1px;background:'+C_BRASS+'"></div>'
+    +'<div style="width:6px;height:6px;background:'+C_BRASS+';transform:rotate(45deg)"></div>'
+    +'<div style="width:48px;height:1px;background:'+C_BRASS+'"></div>'
+    +'</div>'
+    +'<div style="font-size:20px;font-weight:600;color:'+C_BRASS_DEEP+';letter-spacing:7px;font-family:'+PAGE_SERIF+'">企 業 管 理 系</div>'
+    +'</div>'
+
+    // 文件編號徽章
+    +'<div style="display:inline-block;padding:18px 36px;border:1px solid '+C_BRASS+';background:rgba(255,255,255,.5);position:relative;margin-bottom:36px">'
+    +'<div style="position:absolute;top:-1px;left:-1px;width:8px;height:8px;border-top:1px solid '+C_BRASS_DEEP+';border-left:1px solid '+C_BRASS_DEEP+'"></div>'
+    +'<div style="position:absolute;top:-1px;right:-1px;width:8px;height:8px;border-top:1px solid '+C_BRASS_DEEP+';border-right:1px solid '+C_BRASS_DEEP+'"></div>'
+    +'<div style="position:absolute;bottom:-1px;left:-1px;width:8px;height:8px;border-bottom:1px solid '+C_BRASS_DEEP+';border-left:1px solid '+C_BRASS_DEEP+'"></div>'
+    +'<div style="position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-bottom:1px solid '+C_BRASS_DEEP+';border-right:1px solid '+C_BRASS_DEEP+'"></div>'
+    +'<div style="font-family:'+PAGE_DISPLAY+';font-size:11px;color:'+C_INK_SOFT+';letter-spacing:4px;text-transform:uppercase;margin-bottom:8px">Application Document</div>'
+    +'<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:38px;color:'+C_BRASS_DEEP+';letter-spacing:4px;font-weight:600">'+romanFor(dcode)+'</div>'
+    +'</div>'
+
+    // 主標題
+    +'<h2 style="font-size:30px;font-weight:700;color:'+C_INK+';letter-spacing:6px;font-family:'+PAGE_SERIF+';margin-bottom:14px;line-height:1.4">'+dtitle+'</h2>'
+    +'<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:14px;color:'+C_INK_SOFT+';letter-spacing:2px;margin-bottom:54px">— '+subtitleEN+' —</div>'
+
+    // 申請人資訊區
+    +'<div style="border-top:1px solid '+C_LINE_STRONG+';border-bottom:1px solid '+C_LINE_STRONG+';padding:24px 40px;min-width:380px">'
+    +'<div style="font-family:'+PAGE_DISPLAY+';font-size:10px;color:'+C_INK_LIGHT+';letter-spacing:5px;text-transform:uppercase;margin-bottom:18px;font-weight:500">— Submitted by —</div>'
+
+    +'<div style="font-family:'+PAGE_SERIF+';font-size:24px;font-weight:700;color:'+C_NAVY+';letter-spacing:6px;margin-bottom:14px">'+(esc(fd.name)||'＿＿＿＿＿＿')+'</div>'
+
+    +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px">'
+    +'<div style="width:24px;height:1px;background:'+C_BRASS+'"></div>'
+    +'<div style="width:3px;height:3px;background:'+C_BRASS+';border-radius:50%"></div>'
+    +'<div style="width:24px;height:1px;background:'+C_BRASS+'"></div>'
+    +'</div>'
+
+    +'<div style="font-family:'+PAGE_SERIF+';font-size:13px;color:'+C_INK_SOFT+';letter-spacing:1.5px;line-height:1.8">'
+    +(esc(fd.school)||'＿＿＿＿＿')+'　·　'+(esc(fd.dept)||'＿＿＿＿＿')+'</div>'
+    +'</div>'
+
+    +'</div>'
+
+    // 底部
+    +'<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center">'
+    +'<div style="font-family:'+PAGE_DISPLAY+';font-size:9.5px;color:'+C_INK_LIGHT+';letter-spacing:3px;text-transform:uppercase;font-style:italic">Department of Business Administration</div>'
+    +'</div>'
+
+    +'</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+//   pSec — 單區塊頁（自傳/動機/未來計畫等）
+// ─────────────────────────────────────────────────────────
+function pSec(code, title, content, imgs, pg, total){
+  var hasImg = imgs && imgs.length>0;
+  var html = renderLines(content);
+  var txtW = hasImg ? '54%' : '100%';
+  return '<div style="width:794px;height:1123px;background:'+C_PAPER+';position:relative;overflow:hidden;font-family:'+PAGE_SERIF+'">'
+       + pageHeader(code, title, 'SECTION')
+       + '<div style="padding:28px 48px 78px;display:flex;gap:24px;height:'+(1123-130-58)+'px;overflow:hidden">'
+       + '<div style="width:'+txtW+';overflow:hidden">'+html+'</div>'
+       + (hasImg ? imgBlock(imgs,{width:'42%',maxH1:320,maxH2:215}) : '')
+       + '</div>'
+       + pageFooter(pg, total)
+       + '</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+//   pDual — 雙區塊頁（C-2+C-3、C-4+C-8、D3 dual）
+// ─────────────────────────────────────────────────────────
+function pDual(cA, tA, conA, imgA, cB, tB, conB, imgB, pg, total){
+  function half(code, title, content, imgs){
+    var html = renderLines(content, {fs:12.5, lh:1.85, hfs:13.5});
+    var hasImg = imgs && imgs.length>0;
+    var imgW = hasImg ? '38%' : '0';
+    var txtW = hasImg ? '60%' : '100%';
+    return '<div style="padding:18px 48px 0">'
+         + '<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:11px">'
+         + '<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:13px;color:'+C_BRASS_DEEP+';letter-spacing:2px;font-weight:600">'+code+'</div>'
+         + '<div style="font-size:18px;font-weight:700;color:'+C_INK+';font-family:'+PAGE_SERIF+';letter-spacing:1.5px;flex:1">'+title+'</div>'
+         + '</div>'
+         + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">'
+         + '<div style="width:32px;height:1px;background:'+C_BRASS+'"></div>'
+         + '<div style="flex:1;height:1px;background:'+C_LINE+'"></div>'
+         + '</div>'
+         + '<div style="display:flex;gap:18px;overflow:hidden">'
+         + '<div style="width:'+txtW+';overflow:hidden">'+html+'</div>'
+         + (hasImg ? imgBlock(imgs,{width:imgW, maxH1:235, maxH2:140, label:'Visual Evidence'}) : '')
+         + '</div></div>';
+  }
+  return '<div style="width:794px;height:1123px;background:'+C_PAPER+';position:relative;overflow:hidden;font-family:'+PAGE_SERIF+'">'
+       // 簡約頂條
+       + '<div style="height:5px;background:'+C_BRASS+'"></div>'
+       + '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 48px;border-bottom:1px solid '+C_LINE+'">'
+       + '<div style="font-family:'+PAGE_DISPLAY+';font-size:10.5px;color:'+C_INK_LIGHT+';letter-spacing:3.5px;text-transform:uppercase;font-style:italic">朝陽科技大學 · 企業管理系</div>'
+       + '<div style="font-family:'+PAGE_DISPLAY+';font-size:11px;color:'+C_BRASS_DEEP+';letter-spacing:1.5px"><span style="font-style:italic">'+pg+'</span> / '+total+'</div>'
+       + '</div>'
+       + half(cA, tA, conA, imgA)
+       // 中央分隔
+       + '<div style="margin:18px 48px;display:flex;align-items:center;gap:12px">'
+       + '<div style="flex:1;height:1px;background:'+C_LINE_STRONG+'"></div>'
+       + '<div style="font-family:'+PAGE_DISPLAY+';font-size:11px;color:'+C_BRASS_DEEP+';letter-spacing:3px;font-style:italic">·  ·  ·</div>'
+       + '<div style="flex:1;height:1px;background:'+C_LINE_STRONG+'"></div>'
+       + '</div>'
+       + half(cB, tB, conB, imgB)
+       + pageFooter(pg, total)
+       + '</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+//   pConc — 結論頁（D1/D2 結尾）
+// ─────────────────────────────────────────────────────────
+function pConc(dcode, dtitle, content, pg, total){
+  var html = renderLines(content,{fs:14, lh:2, hfs:15});
+  return '<div style="width:794px;height:1123px;background:'+C_CREAM+';position:relative;overflow:hidden;font-family:'+PAGE_SERIF+'">'
+       // 頂部裝飾
+       + '<div style="height:5px;background:'+C_BRASS+'"></div>'
+       + '<div style="padding:42px 48px 0;text-align:center">'
+       + '<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:11px;color:'+C_BRASS_DEEP+';letter-spacing:5px;text-transform:uppercase;margin-bottom:8px">— Conclusion —</div>'
+       + '<h1 style="font-size:28px;font-weight:700;color:'+C_INK+';letter-spacing:5px;font-family:'+PAGE_SERIF+';margin-bottom:14px">'+dtitle+'</h1>'
+       + '<div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:24px">'
+       + '<div style="width:36px;height:1px;background:'+C_BRASS+'"></div>'
+       + '<div style="width:5px;height:5px;background:'+C_BRASS+';transform:rotate(45deg)"></div>'
+       + '<div style="width:36px;height:1px;background:'+C_BRASS+'"></div>'
+       + '</div>'
+       + '</div>'
+       // 申請人資訊小條
+       + '<div style="margin:0 48px 20px;padding:11px 18px;background:'+C_PAPER+';border:1px solid '+C_LINE_STRONG+';display:flex;align-items:center;gap:14px">'
+       + '<div style="width:34px;height:34px;border:1px solid '+C_BRASS+';display:flex;align-items:center;justify-content:center;color:'+C_BRASS_DEEP+';font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:18px;font-weight:600;flex-shrink:0;background:'+C_CREAM+'">'+(esc(fd.name)||'？')[0]+'</div>'
+       + '<div style="flex:1">'
+       + '<div style="font-size:14px;font-weight:700;color:'+C_NAVY+';font-family:'+PAGE_SERIF+';letter-spacing:1px">'+(esc(fd.name)||'申請人')+'</div>'
+       + '<div style="font-size:10.5px;color:'+C_INK_LIGHT+';margin-top:2px;font-family:'+PAGE_DISPLAY+';font-style:italic;letter-spacing:1.5px">'+(esc(fd.school)||'')+' &nbsp;·&nbsp; '+(esc(fd.dept)||'')+'</div>'
+       + '</div>'
+       + '</div>'
+       // 內文
+       + '<div style="padding:8px 48px 78px;background:'+C_PAPER+';margin:0 48px;border:1px solid '+C_LINE+';height:'+(1123-200-58-32)+'px;overflow:hidden">'
+       + '<div style="padding:24px 4px">' + html + '</div>'
+       + '</div>'
+       + pageFooter(pg, total)
+       + '</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+//   pBio — D2 個人簡歷頁（左右雙欄）
+// ─────────────────────────────────────────────────────────
+function pBio(){
+  var listItems = function(text){
+    if(!text) return '<div style="font-size:11.5px;color:'+C_INK_LIGHT+';font-style:italic;font-family:'+PAGE_DISPLAY+';letter-spacing:1px">— Not Provided —</div>';
+    return text.split('\n').map(function(l){
+      return l.trim() ? '<div style="font-size:12.5px;color:'+C_INK+';padding:6px 0;border-bottom:1px dotted '+C_LINE_STRONG+';line-height:1.5;font-family:'+PAGE_SANS+'">'+esc(l)+'</div>' : '';
+    }).join('');
+  };
+  var blockTitle = function(t,en){
+    return '<div style="margin-bottom:10px">'
+         + '<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:9.5px;color:'+C_BRASS_DEEP+';letter-spacing:3px;text-transform:uppercase;margin-bottom:2px">— '+en+' —</div>'
+         + '<div style="font-family:'+PAGE_SERIF+';font-size:14px;font-weight:700;color:'+C_NAVY+';letter-spacing:1.5px;padding-bottom:5px;border-bottom:1px solid '+C_BRASS+'">'+t+'</div>'
+         + '</div>';
+  };
+  return '<div style="width:794px;height:1123px;background:'+C_PAPER+';position:relative;overflow:hidden;font-family:'+PAGE_SERIF+'">'
+       + pageHeader('D2','個人簡歷','PROFILE')
+       + '<div style="padding:28px 48px 78px;display:grid;grid-template-columns:1fr 1fr;gap:32px;height:'+(1123-130-58)+'px;overflow:hidden">'
+       // 左欄
+       + '<div>'
+       + '<div style="margin-bottom:22px">'+blockTitle('基本資訊','Personal Info')
+       + '<div style="font-size:13px;color:'+C_INK+';line-height:2.1;font-family:'+PAGE_SANS+'">'
+       + '<div><span style="color:'+C_INK_LIGHT+';font-size:10px;letter-spacing:2px;text-transform:uppercase;font-family:'+PAGE_DISPLAY+'">姓名 / Name</span><br><b style="font-size:14px;color:'+C_NAVY+';font-family:'+PAGE_SERIF+'">'+(esc(fd.name)||'—')+'</b></div>'
+       + '<div style="margin-top:10px"><span style="color:'+C_INK_LIGHT+';font-size:10px;letter-spacing:2px;text-transform:uppercase;font-family:'+PAGE_DISPLAY+'">學校 / School</span><br>'+(esc(fd.school)||'—')+'</div>'
+       + '<div style="margin-top:10px"><span style="color:'+C_INK_LIGHT+';font-size:10px;letter-spacing:2px;text-transform:uppercase;font-family:'+PAGE_DISPLAY+'">科別 / Department</span><br>'+(esc(fd.dept)||'—')+'</div>'
+       + '</div></div>'
+       + '<div style="margin-bottom:22px">'+blockTitle('幹部經歷','Leadership')+listItems(fd.d2roles)+'</div>'
+       + '<div style="margin-bottom:22px">'+blockTitle('活動參與','Activities')+listItems(fd.d2activities)+'</div>'
+       + '</div>'
+       // 右欄
+       + '<div>'
+       + '<div style="margin-bottom:22px">'+blockTitle('競賽表現','Competitions')+listItems(fd.d2competitions)+'</div>'
+       + '<div style="margin-bottom:22px">'+blockTitle('個人特質','Traits')
+       + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'
+       + (fd.d2traits.length ? fd.d2traits.map(function(t){
+         return '<span style="background:'+C_CREAM+';color:'+C_NAVY+';border:1px solid '+C_BRASS+';padding:4px 11px;font-size:11px;font-weight:600;font-family:'+PAGE_SERIF+';letter-spacing:.3px">'+esc(t)+'</span>';
+       }).join('') : '<div style="font-size:11.5px;color:'+C_INK_LIGHT+';font-style:italic;font-family:'+PAGE_DISPLAY+';letter-spacing:1px">— Not Specified —</div>')
+       + '</div></div>'
+       + '</div></div>'
+       + pageFooter(2, 8)
+       + '</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+//   pGrades — D2 學習成績反思頁
+// ─────────────────────────────────────────────────────────
+function pGrades(){
+  function gb(n,t,idx){
+    var html = renderLines(t,{fs:12.5, lh:1.85, hfs:13.5});
+    return '<div style="margin-bottom:22px;padding-bottom:18px;border-bottom:1px dotted '+C_LINE_STRONG+'">'
+         + '<div style="display:flex;align-items:baseline;gap:11px;margin-bottom:9px">'
+         + '<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:18px;color:'+C_BRASS_DEEP+';font-weight:600;letter-spacing:1px">№ '+idx+'</div>'
+         + '<div style="flex:1;font-size:15px;font-weight:700;color:'+C_INK+';font-family:'+PAGE_SERIF+';letter-spacing:1.5px;border-bottom:1px solid '+C_BRASS+';padding-bottom:4px">'+(esc(n)||'科目名稱')+'</div>'
+         + '</div>'
+         + html + '</div>';
+  }
+  return '<div style="width:794px;height:1123px;background:'+C_PAPER+';position:relative;overflow:hidden;font-family:'+PAGE_SERIF+'">'
+       + pageHeader('D2','學習歷程反思 — 成績','GRADES')
+       + '<div style="padding:28px 48px 78px;overflow:hidden;height:'+(1123-130-58)+'px">'
+       + gb(fd.d2g1n, fd.d2g1t, 'I')
+       + gb(fd.d2g2n, fd.d2g2t, 'II')
+       + gb(fd.d2g3n, fd.d2g3t, 'III')
+       + '</div>'
+       + pageFooter(5, 8)
+       + '</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+//   pCourses — D2 課程學習成果頁
+// ─────────────────────────────────────────────────────────
+function pCourses(){
+  function cb(n,t,idx){
+    var html = renderLines(t,{fs:13, lh:1.95, hfs:14});
+    return '<div style="margin-bottom:26px;padding-bottom:20px;border-bottom:1px dotted '+C_LINE_STRONG+'">'
+         + '<div style="display:flex;align-items:baseline;gap:11px;margin-bottom:10px">'
+         + '<div style="font-family:'+PAGE_DISPLAY+';font-style:italic;font-size:19px;color:'+C_BRASS_DEEP+';font-weight:600">№ '+idx+'</div>'
+         + '<div style="flex:1;font-size:16px;font-weight:700;color:'+C_INK+';font-family:'+PAGE_SERIF+';letter-spacing:1.5px;border-bottom:1px solid '+C_BRASS+';padding-bottom:4px">'+(esc(n)||'課程名稱')+'</div>'
+         + '</div>'
+         + html + '</div>';
+  }
+  return '<div style="width:794px;height:1123px;background:'+C_PAPER+';position:relative;overflow:hidden;font-family:'+PAGE_SERIF+'">'
+       + pageHeader('D2','課程學習成果','COURSES')
+       + '<div style="padding:28px 48px 78px;overflow:hidden;height:'+(1123-130-58)+'px">'
+       + cb(fd.d2c1n, fd.d2c1t, 'I')
+       + cb(fd.d2c2n, fd.d2c2t, 'II')
+       + '</div>'
+       + pageFooter(6, 8)
+       + '</div>';
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGE COLLECTIONS
+══════════════════════════════════════════════════════════ */
+function getD1Pages(){return[
+  {l:'D1 封面', h:pCover('D1','多元表現總整心得')},
+  {l:'C-2 + C-3', h:pDual('C-2','社團活動',fd.c2,fd.c2img,'C-3','幹部經驗',fd.c3,fd.c3img,2,4)},
+  {l:'C-4 + C-8', h:pDual('C-4','服務學習',fd.c4,fd.c4img,'C-8','特殊優良表現',fd.c8,fd.c8img,3,4)},
+  {l:'結論', h:pConc('D1','多元表現總整心得',fd.d1conc,4,4)}
+];}
+
+function getD2Pages(){return[
+  {l:'D2 封面', h:pCover('D2','學習歷程自述')},
+  {l:'個人簡歷', h:pBio()},
+  {l:'自傳', h:pSec('D2','自傳',fd.d2bio,null,3,8)},
+  {l:'就讀動機', h:pSec('D2','就讀動機',fd.d2motive,null,4,8)},
+  {l:'學習成績', h:pGrades()},
+  {l:'課程成果', h:pCourses()},
+  {l:'未來計畫', h:pSec('D2','未來學習計畫',fd.d2plan,null,7,8)},
+  {l:'學習反思', h:pConc('D2','學習歷程自述',fd.d2reflect,8,8)}
+];}
+
+function getD3Pages(){return[
+  {l:'D3 封面', h:pCover('D3','其他有利審查資料')},
+  {l:'語言+競賽', h:pDual('D3','語言檢定證書',fd.d3lang,fd.d3langimg,'D3','競賽獲獎紀錄',fd.d3awards,fd.d3awardsimg,2,3)},
+  {l:'專題+其他', h:pDual('D3','專題成果',fd.d3projects,fd.d3projectsimg,'D3','其他有利資料',fd.d3other,fd.d3otherimg,3,3)}
+];}
+
+/* ════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════ */
 render();
 </script>
 </body>
